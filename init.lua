@@ -24,3 +24,4 @@ require("lazy").setup(require("plugins"))
 -- Load configuration
 require("general")
 require("lsp")
+
