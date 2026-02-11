@@ -1,0 +1,34 @@
+local M = {}
+
+M.colors = {
+  bg_dim = '#293136',
+  bg0 = '#333c43',
+  bg1 = '#3a464c',
+  bg2 = '#434f55',
+  bg3 = '#4d5960',
+  bg4 = '#555f66',
+  bg5 = '#5d6b66',
+  bg_red = '#59464c',
+  bg_yellow = '#55544a',
+  bg_green = '#48584e',
+  bg_blue = '#3f5865',
+  bg_purple = '#4e4953',
+  bg_visual = '#5c3f4f',
+  fg = '#d3c6aa',
+  red = '#e67e80',
+  yellow = '#dbbc7f',
+  green = '#a7c080',
+  blue = '#7fbbb3',
+  purple = '#d699b6',
+  aqua = '#83c092',
+  orange = '#e69875',
+  grey0 = '#7a8478',
+  grey1 = '#859289',
+  grey2 = '#9da9a0',
+  git_current = '#2d3b2d',
+  git_current_label = '#3a4f3a',
+  git_incoming = '#2d3539',
+  git_incoming_label = '#3a4a50',
+}
+
+return M
