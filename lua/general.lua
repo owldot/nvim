@@ -20,7 +20,7 @@ vim.opt.mouse = "a"
 
 -- Line numbers
 vim.opt.number = true
-vim.opt.relativenumber = false
+vim.opt.relativenumber = true
 
 -- Highlight current line
 vim.opt.cursorline = true
@@ -172,13 +172,8 @@ vim.keymap.set("n", "<leader>fF", function() require('fff').find_in_git_root() e
 -- Telescope (grep, buffers, help)
 local builtin = require("telescope.builtin")
 vim.keymap.set('n', '<leader>fs', function()
-  local glob = vim.fn.input('File mask (e.g. **/*.lua, empty for all): ')
-  require("telescope").extensions.live_grep_args.live_grep_args({
-    additional_args = glob ~= '' and function()
-      return { '--iglob', glob }
-    end or nil,
-  })
-end, { desc = 'Live grep (file mask)' })
+  require("telescope").extensions.live_grep_args.live_grep_args()
+end, { desc = 'Live grep with mask' })
 vim.keymap.set("n", "<leader>fo", builtin.oldfiles, { desc = "Recent files" })
 vim.keymap.set("n", "<leader>fg", builtin.live_grep, { desc = "Live grep" })
 vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "Buffers" })
