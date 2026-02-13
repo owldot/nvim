@@ -147,27 +147,43 @@ return {
           end
 
           -- Navigation
-          map('n', ']c', function()
+          map('n', '[g', function()
             if vim.wo.diff then
               vim.cmd.normal({']c', bang = true})
             else
               gitsigns.nav_hunk('next')
             end
-          end)
+          end, { desc = 'Next hunk' })
 
-          map('n', '[c', function()
-            if vim.wo.diff then
-              vim.cmd.normal({'[c', bang = true})
-            else
-              gitsigns.nav_hunk('prev')
-            end
-          end)
-
-          map('n', '<leader>hb', function()
+          map('n', '<leader>gb', function()
             gitsigns.blame_line({ full = true })
-          end)
+          end, { desc = 'Blame line' })
 
-          map('n', '<leader>hd', gitsigns.diffthis)
+          map('n', '<leader>gd', function()
+            local orig_win = vim.api.nvim_get_current_win()
+            gitsigns.diffthis()
+            vim.schedule(function()
+              local new_win = vim.api.nvim_get_current_win()
+              -- If gitsigns left us in the original, switch to the diff split
+              if new_win == orig_win then
+                vim.cmd('wincmd p')
+              end
+              -- When this diff window closes, turn off diff on the original
+              vim.api.nvim_create_autocmd('WinClosed', {
+                once = true,
+                pattern = tostring(vim.api.nvim_get_current_win()),
+                callback = function()
+                  if vim.api.nvim_win_is_valid(orig_win) then
+                    vim.api.nvim_win_call(orig_win, function()
+                      vim.cmd('diffoff')
+                    end)
+                  end
+                end,
+              })
+            end)
+          end, { desc = 'Diff this' })
+
+          map('n', '<leader>ga', gitsigns.stage_hunk, { desc = 'Stage hunk' })
         end
       })
     end,
