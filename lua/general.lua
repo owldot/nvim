@@ -73,6 +73,30 @@ _G.stl_mode = function()
   return " " .. (modes[vim.fn.mode()] or "UNKNOWN") .. " "
 end
 
+_G.stl_lsp = function()
+  local clients = vim.lsp.get_clients({ bufnr = 0 })
+  if #clients == 0 then
+    return ""
+  end
+
+  local status = vim.lsp.status()
+  if status and status ~= "" then
+    return " " .. status .. " "
+  end
+
+  local names = {}
+  for _, c in ipairs(clients) do
+    names[#names + 1] = c.name
+  end
+  return " [" .. table.concat(names, ",") .. "] "
+end
+
+vim.api.nvim_create_autocmd("LspProgress", {
+  callback = function()
+    vim.cmd.redrawstatus()
+  end,
+})
+
 vim.o.statusline = table.concat({
   "%#StatusLineMode#",
   "%{v:lua.stl_mode()}",   -- mode indicator with dynamic highlight
@@ -83,6 +107,7 @@ vim.o.statusline = table.concat({
   " %=",                    -- split left/right
   " %{v:lua.stl_git()}",    -- git branch
   "  %y",                   -- filetype
+  " %{v:lua.stl_lsp()}", -- LSP status
   "%#StatusLineLC#",
   "  %l:%c",                -- line:col (mode color)
   "  %p%% ",                -- percent through file (mode color)

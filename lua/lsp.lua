@@ -3,12 +3,42 @@ caps.general.positionEncodings = { "utf-16" }
 
 local format_on_save_group = vim.api.nvim_create_augroup("LspFormatOnSave", {})
 
+-- RUBY
+local ruby_lsp_bin
+if vim.env.GEM_HOME then
+  ruby_lsp_bin = vim.fn.expand(vim.env.GEM_HOME .. "/bin/ruby-lsp")
+else
+  ruby_lsp_bin = ""
+end
+
+if ruby_lsp_bin ~= "" and vim.fn.executable(ruby_lsp_bin) == 0 then
+  vim.notify("ruby-lsp not found, attempting to install...", vim.log.levels.INFO)
+  vim.fn.jobstart("gem install ruby-lsp; gem install ruby-lsp-rails", {
+    on_exit = function(_, code)
+      if code == 0 then
+        vim.notify("Successfully installed ruby-lsp.", vim.log.levels.INFO)
+      else
+        vim.notify("Failed to install ruby-lsp.", vim.log.levels.ERROR)
+      end
+    end,
+  })
+end
+
 vim.lsp.config.ruby_lsp = {
   cmd = { "ruby-lsp" },
   root_markers = { "Gemfile" },
   filetypes = { "ruby" },
+  init_options = {
+    addonSettings = {
+      ["Ruby LSP Rails"] = {
+        enablePendingMigrationsPrompt = false,
+      },
+    },
+  },
 }
 vim.lsp.enable({ "ruby_lsp" })
+
+-- Sorbet
 
 vim.lsp.config.sorbet = {
   cmd = { "srb", "tc", "--lsp" },
@@ -84,3 +114,4 @@ vim.api.nvim_create_autocmd("LspAttach", {
     end
   end
 })
+
