@@ -157,6 +157,19 @@ vim.api.nvim_create_autocmd('ColorScheme', {
 vim.opt.wildmenu = true
 vim.opt.wildmode = { "longest", "list", "full" }
 
+-- Insert mode completion UI (builtin PUM)
+vim.o.completeopt = "menu,menuone,noselect"
+-- Add ",popup" if on Neovim 0.10+ for floating PUM
+pcall(function()
+  if vim.fn.has("nvim-0.10") == 1 then
+    vim.o.completeopt = vim.o.completeopt .. ",popup"
+    -- optional sizing tweaks (0.10+)
+    vim.o.pumheight = 8
+    vim.o.pummaxwidth = 80
+  end
+end)
+vim.opt.shortmess:append("c")
+
 -- Session management - only save visible windows/files
 vim.opt.sessionoptions = {
   "curdir",    -- current directory
@@ -205,6 +218,12 @@ vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "Buffers" })
 vim.keymap.set("n", "<leader>fh", builtin.help_tags, { desc = "Help" })
 vim.keymap.set("n", "<leader>ft", builtin.git_files, { desc = "Git files" })
 vim.keymap.set('n', '<leader>gs', builtin.git_status, { desc = '[G]it [S]tatus' })
+
+-- Convenient omni-completion trigger (maps <C-c> to Ctrl-x Ctrl-o)
+vim.keymap.set("i", "<C-c>", function()
+  local keys = vim.api.nvim_replace_termcodes("<C-x><C-o>", true, true, true)
+  vim.api.nvim_feedkeys(keys, "n", false)
+end, { desc = "LSP omni-completion" })
 
 -- Git
 vim.keymap.set("n", "<leader>gr", ":Gitsigns refresh<CR>", { desc = "Refresh git branch" })

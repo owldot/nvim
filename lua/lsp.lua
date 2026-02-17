@@ -79,6 +79,8 @@ vim.diagnostic.config({
 vim.api.nvim_create_autocmd("LspAttach", {
   group = vim.api.nvim_create_augroup("UserLspConfig", {}),
   callback = function(ev)
+    -- Use builtin LSP as omnifunc for insert-mode completion (Ctrl-x Ctrl-o)
+    vim.bo[ev.buf].omnifunc = "v:lua.vim.lsp.omnifunc"
     local opts = { buffer = ev.buf }
     local client = vim.lsp.get_client_by_id(ev.data.client_id)
 
@@ -114,4 +116,3 @@ vim.api.nvim_create_autocmd("LspAttach", {
     end
   end
 })
-
