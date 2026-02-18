@@ -2,4 +2,3 @@
 .local
 .nvimlog
 *.bak
-after/
