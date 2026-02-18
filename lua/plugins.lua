@@ -59,20 +59,27 @@ return {
 
   {
     "nvim-treesitter/nvim-treesitter",
+    dependencies = { "nvim-treesitter/nvim-treesitter-textobjects" },
     build = ":TSUpdate",
     config = function()
-      local ok, treesitter = pcall(require, 'nvim-treesitter.configs')
-      if ok then
-        treesitter.setup({
-          ensure_installed = { "ruby", "lua", "vim", "vimdoc", "rust", "javascript", "typescript" },
-          auto_install = true,
-          highlight = {
-            enable = true,
-          },
-          indent = {
-            enable = true,
-          },
-        })
+      require('nvim-treesitter-textobjects').setup({
+        select = { lookahead = true },
+      })
+      local select = require('nvim-treesitter-textobjects.select')
+      local keymaps = {
+        ["af"] = "@function.outer",
+        ["if"] = "@function.inner",
+        ["ac"] = "@class.outer",
+        ["ic"] = "@class.inner",
+        ["aa"] = "@parameter.outer",
+        ["ia"] = "@parameter.inner",
+        ["ai"] = "@conditional.outer",
+        ["ii"] = "@conditional.inner",
+      }
+      for keymap, query in pairs(keymaps) do
+        vim.keymap.set({ "x", "o" }, keymap, function()
+          select.select_textobject(query)
+        end)
       end
     end,
   },
