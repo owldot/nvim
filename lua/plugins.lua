@@ -39,7 +39,9 @@ return {
       vim.g.everforest_better_performance = 1
 
       local function apply_everforest_highlights()
-        vim.api.nvim_set_hl(0, 'WinSeparator', { fg = colors.yellow, bg = 'NONE' })
+        -- Increase contrast for split separators so horizontal lines are visible
+        -- Use theme background instead of NONE to avoid blending
+        vim.api.nvim_set_hl(0, 'WinSeparator', { fg = colors.yellow, bg = colors.bg1 })
         vim.api.nvim_set_hl(0, 'StatusLine', { fg = colors.fg, bg = colors.bg_blue })
         vim.api.nvim_set_hl(0, 'StatusLineNC', { fg = colors.fg, bg = colors.bg1 })
         vim.api.nvim_set_hl(0, 'DiagnosticOk', { fg = colors.green, bg = 'NONE' })
