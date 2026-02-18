@@ -203,6 +203,14 @@ vim.keymap.set("n", "N", "Nzzzv")
 -- Clear highlight
 vim.keymap.set("n", "<Esc>", ":nohlsearch<CR>")
 
+-- Exit terminal mode
+vim.keymap.set('t', '<C-w>h', "<C-\\><C-n><C-w>h",{silent = true})
+vim.keymap.set('t', '<C-w>j', "<C-\\><C-n><C-w>j",{silent = true})
+vim.keymap.set('t', '<C-w>k', "<C-\\><C-n><C-w>k",{silent = true})
+vim.keymap.set('t', '<C-w>l', "<C-\\><C-n><C-w>l",{silent = true})
+vim.keymap.set('t', '<C-w>w', "<C-\\><C-n><C-w>w",{silent = true})
+vim.keymap.set('t', '<C-w><C-w>', "<C-\\><C-n><C-w><C-w>",{silent = true})
+
 -- fff.nvim (fast file finder)
 vim.keymap.set("n", "<leader>ff", function() require('fff').find_files() end, { desc = "Find files (fff)" })
 vim.keymap.set("n", "<leader>fF", function() require('fff').find_in_git_root() end, { desc = "Find files in git root (fff)" })
