@@ -28,6 +28,10 @@ vim.lsp.config.ruby_lsp = {
   cmd = { "ruby-lsp" },
   root_markers = { "Gemfile" },
   filetypes = { "ruby" },
+  on_error = function(code, err)
+    if code == vim.lsp.client_errors.NO_RESULT_CALLBACK_FOUND then return end
+    vim.notify(string.format("ruby_lsp error %d: %s", code, err), vim.log.levels.ERROR)
+  end,
   init_options = {
     addonSettings = {
       ["Ruby LSP Rails"] = {

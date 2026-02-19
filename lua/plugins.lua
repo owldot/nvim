@@ -75,6 +75,8 @@ return {
         ["ia"] = "@parameter.inner",
         ["ai"] = "@conditional.outer",
         ["ii"] = "@conditional.inner",
+        ["ab"] = "@block.outer",
+        ["ib"] = "@block.inner",
       }
       for keymap, query in pairs(keymaps) do
         vim.keymap.set({ "x", "o" }, keymap, function()
