@@ -28,6 +28,7 @@ vim.lsp.config.ruby_lsp = {
   cmd = { "ruby-lsp" },
   root_markers = { "Gemfile" },
   filetypes = { "ruby" },
+  capabilities = caps,
   on_error = function(code, err)
     if code == vim.lsp.client_errors.NO_RESULT_CALLBACK_FOUND then return end
     vim.notify(string.format("ruby_lsp error %d: %s", code, err), vim.log.levels.ERROR)
@@ -48,6 +49,7 @@ vim.lsp.config.sorbet = {
   cmd = { "srb", "tc", "--lsp" },
   root_markers = { "sorbet/" },
   filetypes = { "ruby" },
+  capabilities = caps,
 }
 vim.lsp.enable({ "sorbet" })
 

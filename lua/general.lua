@@ -56,7 +56,15 @@ vim.opt.hlsearch = false
 vim.opt.incsearch = true
 
 _G.stl_git = function()
-  return vim.b.gitsigns_head and (" " .. vim.b.gitsigns_head) or ""
+  local head = vim.b.gitsigns_head
+  if head and head ~= ".invalid" then
+    return " " .. head
+  end
+  local root = vim.fs.root(0, ".git")
+  if not root then return "" end
+  local branch = vim.fn.system("git -C " .. vim.fn.shellescape(root) .. " branch --show-current 2>/dev/null"):gsub("\n", "")
+  if branch ~= "" then return " " .. branch end
+  return ""
 end
 
 _G.stl_mode = function()
@@ -80,7 +88,7 @@ _G.stl_lsp = function()
   end
 
   local status = vim.lsp.status()
-  if status and status ~= "" then
+  if status and status ~= "" and not status:find("%.invalid") then
     return " " .. status .. " "
   end
 
@@ -225,10 +233,17 @@ vim.keymap.set("n", "<leader>fF", function() require('fff').find_in_git_root() e
 -- Telescope (grep, buffers, help)
 local builtin = require("telescope.builtin")
 vim.keymap.set('n', '<leader>fs', function()
-  require("telescope").extensions.live_grep_args.live_grep_args()
+  vim.ui.input({ prompt = 'File glob (e.g. *.rb): ' }, function(glob)
+    if glob == nil then return end
+    local opts = {}
+    if glob ~= '' then
+      local g = glob:find('^%*%*/') and glob or ('**/' .. glob)
+      opts.additional_args = { '-g', g }
+    end
+    builtin.live_grep(opts)
+  end)
 end, { desc = 'Live grep with mask' })
 vim.keymap.set("n", "<leader>fo", builtin.oldfiles, { desc = "Recent files" })
-vim.keymap.set("n", "<leader>fg", builtin.live_grep, { desc = "Live grep" })
 vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "Buffers" })
 vim.keymap.set("n", "<leader>fh", builtin.help_tags, { desc = "Help" })
 vim.keymap.set("n", "<leader>ft", builtin.git_files, { desc = "Git files" })

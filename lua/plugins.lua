@@ -10,7 +10,6 @@ return {
         build = 'make',
         cond = vim.fn.executable('make') == 1,
       },
-      'nvim-telescope/telescope-live-grep-args.nvim',
     },
     config = function()
       local telescope = require('telescope')
@@ -26,7 +25,6 @@ return {
       })
 
       pcall(telescope.load_extension, 'fzf')
-      pcall(telescope.load_extension, 'live_grep_args')
     end,
   },
 
