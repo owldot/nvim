@@ -69,18 +69,59 @@ vim.lsp.config.rust_analyzer = {
 vim.lsp.enable({ "rust_analyzer" })
 
 -- Configure diagnostics display
+-- Helper: rounded border with slight padding
+local function padded_border(hl)
+  hl = hl or "FloatBorder"
+  return {
+    {"┌", hl}, {"─", hl}, {"┐", hl}, {"│", hl},
+    {"┘", hl}, {"─", hl}, {"└", hl}, {"│", hl},
+  }
+end
+
 vim.diagnostic.config({
   signs = true,
   underline = true,
   update_in_insert = true,
   severity_sort = true,
   float = {
-    border = "rounded",
+    -- bright rounded border; padding achieved via style in handlers below
+    border = padded_border(),
     source = "always",
     header = "",
     prefix = "",
   },
 })
+
+-- Rounded borders for LSP hover/signature windows with padding
+local function with_border(handler)
+  return vim.lsp.with(handler, {
+    border = padded_border(),
+    max_width = 100,
+    max_height = 25,
+  })
+end
+vim.lsp.handlers["textDocument/hover"] = with_border(vim.lsp.handlers.hover)
+vim.lsp.handlers["textDocument/signatureHelp"] = with_border(vim.lsp.handlers.signature_help)
+
+-- Rounded borders for LSP hover/signature windows
+vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "rounded" })
+vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, { border = "rounded" })
+
+-- Force-hover helper that always uses our border regardless of global handlers
+local function bordered_hover()
+  local params = vim.lsp.util.make_position_params()
+  local bufnr = vim.api.nvim_get_current_buf()
+  local clients = vim.lsp.get_clients({ bufnr = bufnr })
+  if #clients == 0 then return end
+  local handler = function(err, result, ctx, config)
+    config = config or {}
+    config.border = padded_border()
+    config.max_width = 100
+    config.max_height = 25
+    return vim.lsp.handlers.hover(err, result, ctx, config)
+  end
+  vim.lsp.buf_request(0, 'textDocument/hover', params, handler)
+end
 
 vim.api.nvim_create_autocmd("LspAttach", {
   group = vim.api.nvim_create_augroup("UserLspConfig", {}),
@@ -97,9 +138,21 @@ vim.api.nvim_create_autocmd("LspAttach", {
     vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
     vim.keymap.set("n", "gy", vim.lsp.buf.type_definition, opts)
 
-    -- Documentation
-    vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+    -- Documentation (force buffer-local K to prefer our handler)
+    pcall(vim.keymap.del, 'n', 'K', { buffer = ev.buf })
+    vim.keymap.set("n", "K", bordered_hover, opts)
     vim.keymap.set("n", "<C-k>", vim.lsp.buf.signature_help, opts)
+    vim.keymap.set("i", "<C-s>", vim.lsp.buf.signature_help, opts)
+
+    -- Re-assert bordered handlers in case another plugin modified them
+    vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = {
+      {"┌","FloatBorder"},{"─","FloatBorder"},{"┐","FloatBorder"},{"│","FloatBorder"},
+      {"┘","FloatBorder"},{"─","FloatBorder"},{"└","FloatBorder"},{"│","FloatBorder"},
+    } })
+    vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, { border = {
+      {"┌","FloatBorder"},{"─","FloatBorder"},{"┐","FloatBorder"},{"│","FloatBorder"},
+      {"┘","FloatBorder"},{"─","FloatBorder"},{"└","FloatBorder"},{"│","FloatBorder"},
+    } })
 
     -- Diagnostics
     vim.keymap.set("n", "<space>e", vim.diagnostic.open_float, opts)
@@ -107,8 +160,12 @@ vim.api.nvim_create_autocmd("LspAttach", {
     vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
     vim.keymap.set("n", "<space>q", vim.diagnostic.setloclist, opts)
 
-    -- Code actions
+    -- Code actions and workspace
     vim.keymap.set({ "n", "v" }, "<space>ca", vim.lsp.buf.code_action, opts)
+    vim.keymap.set("n", "<leader>vca", vim.lsp.buf.code_action, opts)
+    vim.keymap.set("n", "<leader>vws", vim.lsp.buf.workspace_symbol, opts)
+    vim.keymap.set("n", "<leader>vrr", vim.lsp.buf.references, opts)
+    vim.keymap.set("n", "<leader>vrn", vim.lsp.buf.rename, opts)
 
     if client and client.server_capabilities.documentFormattingProvider then
       vim.api.nvim_clear_autocmds({ group = format_on_save_group, buffer = ev.buf })

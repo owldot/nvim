@@ -28,6 +28,66 @@ return {
     end,
   },
 
+  -- Autocomplete (nvim-cmp) with bright double borders
+  {
+    "hrsh7th/nvim-cmp",
+    dependencies = {
+      "hrsh7th/cmp-nvim-lsp",
+      "hrsh7th/cmp-buffer",
+      "hrsh7th/cmp-path",
+      "saadparwaiz1/cmp_luasnip",
+      "L3MON4D3/LuaSnip",
+      "rafamadriz/friendly-snippets",
+    },
+    config = function()
+      local cmp = require('cmp')
+      local luasnip = require('luasnip')
+      require('luasnip.loaders.from_vscode').lazy_load()
+
+      local function single_border()
+        return {
+          {"┌", "FloatBorder"}, {"─", "FloatBorder"}, {"┐", "FloatBorder"}, {"│", "FloatBorder"},
+          {"┘", "FloatBorder"}, {"─", "FloatBorder"}, {"└", "FloatBorder"}, {"│", "FloatBorder"},
+        }
+      end
+
+      cmp.setup({
+        snippet = {
+          expand = function(args) luasnip.lsp_expand(args.body) end,
+        },
+        mapping = cmp.mapping.preset.insert({
+          ["<C-n>"] = cmp.mapping.select_next_item(),
+          ["<C-p>"] = cmp.mapping.select_prev_item(),
+          ["<C-y>"] = cmp.mapping.confirm({ select = true }),
+          ["<CR>"] = cmp.mapping.confirm({ select = false }),
+          ["<C-e>"] = cmp.mapping.abort(),
+          ["<C-Space>"] = cmp.mapping.complete(),
+          ["<Tab>"] = cmp.mapping(function(fallback)
+            if cmp.visible() then cmp.select_next_item()
+            elseif luasnip.expand_or_jumpable() then luasnip.expand_or_jump()
+            else fallback() end
+          end, { "i", "s" }),
+          ["<S-Tab>"] = cmp.mapping(function(fallback)
+            if cmp.visible() then cmp.select_prev_item()
+            elseif luasnip.jumpable(-1) then luasnip.jump(-1)
+            else fallback() end
+          end, { "i", "s" }),
+        }),
+        sources = cmp.config.sources({ { name = 'nvim_lsp' }, { name = 'luasnip' } }, { { name = 'path' }, { name = 'buffer' } }),
+        window = {
+          completion = cmp.config.window.bordered({
+            border = single_border(),
+            winhighlight = "NormalFloat:NormalFloat,FloatBorder:FloatBorder,Pmenu:Pmenu,CursorLine:PmenuSel,Search:None",
+          }),
+          documentation = cmp.config.window.bordered({
+            border = single_border(),
+            winhighlight = "NormalFloat:NormalFloat,FloatBorder:FloatBorder",
+          }),
+        },
+      })
+    end,
+  },
+
 
   {
     'sainnhe/everforest',
@@ -43,6 +103,9 @@ return {
         vim.api.nvim_set_hl(0, 'StatusLine', { fg = colors.fg, bg = colors.bg_blue })
         vim.api.nvim_set_hl(0, 'StatusLineNC', { fg = colors.fg, bg = colors.bg1 })
         vim.api.nvim_set_hl(0, 'DiagnosticOk', { fg = colors.green, bg = 'NONE' })
+        -- Popup / float styling: bright border and subtle background
+        vim.api.nvim_set_hl(0, 'NormalFloat', { bg = colors.bg1 })
+        vim.api.nvim_set_hl(0, 'FloatBorder', { fg = colors.yellow, bg = colors.bg1 })
       end
 
       vim.api.nvim_create_autocmd('ColorScheme', {
@@ -163,7 +226,21 @@ return {
   {
     "lewis6991/gitsigns.nvim",
     config = function()
+      local function single_border()
+        return {
+          {"┌", "FloatBorder"}, {"─", "FloatBorder"}, {"┐", "FloatBorder"}, {"│", "FloatBorder"},
+          {"┘", "FloatBorder"}, {"─", "FloatBorder"}, {"└", "FloatBorder"}, {"│", "FloatBorder"},
+        }
+      end
+
       require('gitsigns').setup({
+        preview_config = {
+          border = single_border(),
+          style = 'minimal',
+          relative = 'cursor',
+          row = 1,
+          col = 1,
+        },
         on_attach = function(bufnr)
           local gitsigns = require('gitsigns')
 
