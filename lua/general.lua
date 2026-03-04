@@ -204,6 +204,23 @@ vim.keymap.set("n", "<leader>o", ":Ex<CR>", { silent = true })
 vim.keymap.set("n", "[b", ":bp<CR>", { silent = true })
 vim.keymap.set("n", "]b", ":bn<CR>", { silent = true })
 
+-- Visual surround: select text, press S, type wrap character
+vim.keymap.set("v", "S", function()
+  local char = vim.fn.getcharstr()
+  local brackets = { ["("] = ")", ["{"] = "}", ["["] = "]", ["<"] = ">" }
+  local reverse = { [")"] = "(", ["}"] = "{", ["]"] = "[", [">"] = "<" }
+  local open, close
+  if brackets[char] then
+    open, close = char, brackets[char]
+  elseif reverse[char] then
+    open, close = reverse[char], char
+  else
+    open, close = char, char
+  end
+  local keys = string.format("<Esc>`>a%s<Esc>`<i%s<Esc>", close, open)
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(keys, true, true, true), "n", false)
+end)
+
 -- Move lines
 vim.keymap.set("n", "<A-Down>", ":move .+1<CR>==", { silent = true })
 vim.keymap.set("n", "<A-Up>", ":move .-2<CR>==", { silent = true })
@@ -233,7 +250,7 @@ vim.keymap.set('i', '<C-b>', '<C-o>b')
 
 -- Remap esc
 vim.keymap.set('i', 'jk', '<Esc>')
-ssvim.api.nvim_create_user_command('W', 'w', {})
+vim.api.nvim_create_user_command('W', 'w', {})
 vim.api.nvim_create_user_command('Q', 'q', {})
 vim.api.nvim_create_user_command('Wq', 'wq', {})
 vim.api.nvim_create_user_command('WQ', 'wq', {})
