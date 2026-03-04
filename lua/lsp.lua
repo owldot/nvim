@@ -75,7 +75,7 @@ vim.diagnostic.config({
   update_in_insert = true,
   severity_sort = true,
   float = {
-    border = "rounded",
+    border = "single",
     source = "always",
     header = "",
     prefix = "",
@@ -98,8 +98,8 @@ vim.api.nvim_create_autocmd("LspAttach", {
     vim.keymap.set("n", "gy", vim.lsp.buf.type_definition, opts)
 
     -- Documentation
-    vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
-    vim.keymap.set("n", "<C-k>", vim.lsp.buf.signature_help, opts)
+    vim.keymap.set("n", "K", function() vim.lsp.buf.hover({ border = "single" }) end, opts)
+    vim.keymap.set("n", "<C-k>", function() vim.lsp.buf.signature_help({ border = "single" }) end, opts)
 
     -- Diagnostics
     vim.keymap.set("n", "<space>e", vim.diagnostic.open_float, opts)

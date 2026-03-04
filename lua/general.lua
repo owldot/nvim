@@ -187,9 +187,17 @@ vim.opt.sessionoptions = {
 
 
 -- Keymaps
-vim.keymap.set("v", "<leader>p", "\"_dP") -- don't replace the register
-vim.keymap.set("n", "<leader>d", "\"_d") -- don't replace the register
-vim.keymap.set("v", "<leader>d", "\"_d") -- don't replace the register
+vim.keymap.set("v", "<leader>p", "\"_dP") -- paste without replacing register
+-- Delete/change without yanking (use black hole register)
+vim.keymap.set({"n", "v"}, "d", '"_d')
+vim.keymap.set({"n", "v"}, "D", '"_D')
+vim.keymap.set("n", "dd", '"_dd')
+vim.keymap.set({"n", "v"}, "c", '"_c')
+vim.keymap.set({"n", "v"}, "C", '"_C')
+vim.keymap.set("n", "cc", '"_cc')
+-- Use x to cut (yank + delete) when you need clipboard
+vim.keymap.set({"n", "v"}, "x", "d")
+vim.keymap.set("n", "xx", "dd")
 
 vim.keymap.set("n", "<leader>o", ":Ex<CR>", { silent = true })
 
@@ -219,9 +227,13 @@ vim.keymap.set('t', '<C-w>l', "<C-\\><C-n><C-w>l",{silent = true})
 vim.keymap.set('t', '<C-w>w', "<C-\\><C-n><C-w>w",{silent = true})
 vim.keymap.set('t', '<C-w><C-w>', "<C-\\><C-n><C-w><C-w>",{silent = true})
 
+-- Insert mode word motions
+vim.keymap.set('i', '<C-f>', '<C-o>w')
+vim.keymap.set('i', '<C-b>', '<C-o>b')
+
 -- Remap esc
 vim.keymap.set('i', 'jk', '<Esc>')
-vim.api.nvim_create_user_command('W', 'w', {})
+ssvim.api.nvim_create_user_command('W', 'w', {})
 vim.api.nvim_create_user_command('Q', 'q', {})
 vim.api.nvim_create_user_command('Wq', 'wq', {})
 vim.api.nvim_create_user_command('WQ', 'wq', {})
@@ -260,8 +272,8 @@ vim.keymap.set("n", "<leader>gr", ":Gitsigns refresh<CR>", { desc = "Refresh git
 
 -- Autocommands
 
--- Auto save on focus lost (not on buffer switch)
-vim.api.nvim_create_autocmd("FocusLost", {
+-- Auto save on focus lost or buffer switch
+vim.api.nvim_create_autocmd({"FocusLost", "BufLeave"}, {
   pattern = "*",
   command = "silent! update",
 })

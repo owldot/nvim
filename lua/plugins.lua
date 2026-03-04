@@ -43,6 +43,8 @@ return {
         vim.api.nvim_set_hl(0, 'StatusLine', { fg = colors.fg, bg = colors.bg_blue })
         vim.api.nvim_set_hl(0, 'StatusLineNC', { fg = colors.fg, bg = colors.bg1 })
         vim.api.nvim_set_hl(0, 'DiagnosticOk', { fg = colors.green, bg = 'NONE' })
+        vim.api.nvim_set_hl(0, 'NormalFloat', { bg = colors.bg1 })
+        vim.api.nvim_set_hl(0, 'FloatBorder', { fg = colors.yellow, bg = colors.bg1 })
       end
 
       vim.api.nvim_create_autocmd('ColorScheme', {
@@ -164,6 +166,13 @@ return {
     "lewis6991/gitsigns.nvim",
     config = function()
       require('gitsigns').setup({
+        preview_config = {
+          border = "single",
+          style = 'minimal',
+          relative = 'cursor',
+          row = 1,
+          col = 1,
+        },
         on_attach = function(bufnr)
           local gitsigns = require('gitsigns')
 
