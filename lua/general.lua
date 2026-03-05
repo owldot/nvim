@@ -269,7 +269,14 @@ vim.keymap.set('n', '<leader>fs', function()
       local g = glob:find('^%*%*/') and glob or ('**/' .. glob)
       opts.additional_args = { '-g', g }
     end
-    builtin.live_grep(opts)
+    vim.ui.select({ 'String', 'RegExp' }, { prompt = 'Search mode:' }, function(mode)
+      if mode == nil then return end
+      if mode == 'String' then
+        opts.additional_args = opts.additional_args or {}
+        table.insert(opts.additional_args, '--fixed-strings')
+      end
+      builtin.live_grep(opts)
+    end)
   end)
 end, { desc = 'Live grep with mask' })
 vim.keymap.set("n", "<leader>fo", builtin.oldfiles, { desc = "Recent files" })
