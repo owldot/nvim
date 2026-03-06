@@ -236,6 +236,12 @@ vim.keymap.set("n", "N", "Nzzzv")
 -- Clear highlight
 vim.keymap.set("n", "<Esc>", ":nohlsearch<CR>")
 
+-- delete buffer
+vim.keymap.set('n', '<leader>x', ':bd<CR>')
+
+-- insert empty line
+vim.keymap.set('n', '<CR>', 'o<Esc>')
+
 -- Exit terminal mode
 vim.keymap.set('t', '<C-w>h', "<C-\\><C-n><C-w>h",{silent = true})
 vim.keymap.set('t', '<C-w>j', "<C-\\><C-n><C-w>j",{silent = true})
