@@ -239,8 +239,8 @@ vim.keymap.set("n", "<Esc>", ":nohlsearch<CR>")
 -- delete buffer
 vim.keymap.set('n', '<leader>x', ':bd<CR>')
 
--- insert empty line
-vim.keymap.set('n', '<CR>', 'o<Esc>')
+-- map <leader><CR> to insert a blank line
+vim.keymap.set('n', '<leader><CR>', 'o<Esc>', { silent = true, desc = 'Insert blank line' })
 
 -- Exit terminal mode
 vim.keymap.set('t', '<C-w>h', "<C-\\><C-n><C-w>h",{silent = true})
