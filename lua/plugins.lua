@@ -1,5 +1,3 @@
-local colors = require('theme').colors
-
 return {
   {
     "nvim-telescope/telescope.nvim",
@@ -34,17 +32,28 @@ return {
     lazy = false,
     priority = 1000,
     config = function()
+      -- Everforest options must be set before :colorscheme
       vim.g.everforest_better_performance = 1
+      vim.g.everforest_dim_inactive_windows = 1
+      vim.g.everforest_sign_column_background = 'linenr'
+      -- Contrast: use medium for both light and dark
+      vim.g.everforest_background = 'medium'
 
       local function apply_everforest_highlights()
+        local ok_cfg, cfg = pcall(vim.fn["everforest#get_configuration"])
+        if not ok_cfg then return end
+        local palette = vim.fn["everforest#get_palette"](cfg.background, cfg.colors_override)
+        local set_hl = vim.fn["everforest#highlight"]
+
         -- Increase contrast for split separators so horizontal lines are visible
-        -- Use theme background instead of NONE to avoid blending
-        vim.api.nvim_set_hl(0, 'WinSeparator', { fg = colors.yellow, bg = colors.bg1 })
-        vim.api.nvim_set_hl(0, 'StatusLine', { fg = colors.fg, bg = colors.bg_blue })
-        vim.api.nvim_set_hl(0, 'StatusLineNC', { fg = colors.fg, bg = colors.bg1 })
-        vim.api.nvim_set_hl(0, 'DiagnosticOk', { fg = colors.green, bg = 'NONE' })
-        vim.api.nvim_set_hl(0, 'NormalFloat', { bg = colors.bg1 })
-        vim.api.nvim_set_hl(0, 'FloatBorder', { fg = colors.yellow, bg = colors.bg1 })
+        set_hl('WinSeparator', palette.yellow, palette.bg1)
+        set_hl('StatusLine', palette.fg, palette.bg_blue)
+        set_hl('StatusLineNC', palette.fg, palette.bg1)
+        set_hl('DiagnosticOk', palette.green, palette.none)
+        set_hl('NormalFloat', palette.none, palette.bg1)
+        set_hl('FloatBorder', palette.yellow, palette.bg1)
+        -- Make inactive windows slightly lighter than bg_dim so they don't look heavy
+        set_hl('NormalNC', palette.fg, palette.bg1)
       end
 
       vim.api.nvim_create_autocmd('ColorScheme', {
@@ -120,11 +129,26 @@ return {
           current = 'DiffText',
         },
       })
-      -- Everforest-friendly conflict colors
-      vim.api.nvim_set_hl(0, 'GitConflictCurrent', { bg = colors.git_current })
-      vim.api.nvim_set_hl(0, 'GitConflictCurrentLabel', { bg = colors.git_current_label })
-      vim.api.nvim_set_hl(0, 'GitConflictIncoming', { bg = colors.git_incoming })
-      vim.api.nvim_set_hl(0, 'GitConflictIncomingLabel', { bg = colors.git_incoming_label })
+
+      -- Everforest-friendly conflict colors using the live palette
+      local function apply_git_conflict_highlights()
+        local ok_cfg, cfg = pcall(vim.fn["everforest#get_configuration"])
+        if not ok_cfg then return end
+        local palette = vim.fn["everforest#get_palette"](cfg.background, cfg.colors_override)
+        local set_hl = vim.fn["everforest#highlight"]
+
+        -- Use themed tints for current/incoming backgrounds
+        set_hl('GitConflictCurrent', palette.none, palette.bg_green)
+        set_hl('GitConflictCurrentLabel', palette.none, palette.bg2)
+        set_hl('GitConflictIncoming', palette.none, palette.bg_blue)
+        set_hl('GitConflictIncomingLabel', palette.none, palette.bg2)
+      end
+
+      apply_git_conflict_highlights()
+      vim.api.nvim_create_autocmd('ColorScheme', {
+        pattern = 'everforest',
+        callback = apply_git_conflict_highlights,
+      })
     end,
   },
 

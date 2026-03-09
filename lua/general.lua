@@ -1,5 +1,3 @@
-local colors = require('theme').colors
-
 -- Colors
 vim.opt.termguicolors = true
 vim.opt.signcolumn = "yes"
@@ -122,29 +120,32 @@ vim.o.statusline = table.concat({
   "%*",
 })
 
-local statusline_mode_colors = {
-  n = colors.bg_green,
-  i = colors.yellow,
-  v = colors.bg_visual,
-  V = colors.bg_visual,
-  ['\22'] = colors.bg_visual,
-  c = colors.bg_green,
-}
-
-local statusline_mode_fg = {
-  n = colors.fg,
-  v = colors.fg,
-  V = colors.fg,
-  ['\22'] = colors.fg,
-  c = colors.fg,
-}
-
 local function set_statusline_section_highlight(mode)
-  local color = statusline_mode_colors[mode] or statusline_mode_colors.n
-  local fg = statusline_mode_fg[mode] or colors.bg0
-  for _, group in ipairs({ 'StatusLineMode', 'StatusLineLC' }) do
-    vim.api.nvim_set_hl(0, group, { fg = fg, bg = color })
-  end
+  local ok_cfg, cfg = pcall(vim.fn["everforest#get_configuration"])
+  if not ok_cfg then return end
+  local p = vim.fn["everforest#get_palette"](cfg.background, cfg.colors_override)
+  local set_hl = vim.fn["everforest#highlight"]
+
+  local bg_by_mode = {
+    n = p.bg_green,
+    i = p.yellow,
+    v = p.bg_visual,
+    V = p.bg_visual,
+    ['\22'] = p.bg_visual,
+    c = p.bg_green,
+  }
+  local fg_by_mode = {
+    n = p.fg,
+    v = p.fg,
+    V = p.fg,
+    ['\22'] = p.fg,
+    c = p.fg,
+  }
+
+  local bg = bg_by_mode[mode] or p.bg_green
+  local fg = fg_by_mode[mode] or p.bg0
+  set_hl('StatusLineMode', fg, bg)
+  set_hl('StatusLineLC', fg, bg)
 end
 
 set_statusline_section_highlight(vim.fn.mode():sub(1, 1))
