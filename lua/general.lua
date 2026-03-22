@@ -2,6 +2,25 @@
 vim.opt.termguicolors = true
 vim.opt.signcolumn = "yes"
 
+-- Wrap
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "*",
+  callback = function()
+    vim.opt_local.wrap = true
+    vim.opt_local.linebreak = true
+    vim.opt_local.breakindent = true
+    vim.opt.colorcolumn = "80"
+  end,
+})
+
+local ruler = require("functions.ruler")
+vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost", "TextChanged", "TextChangedI" }, {
+  pattern = "*",
+  callback = function()
+    ruler.draw_col80(vim.api.nvim_get_current_buf())
+  end,
+})
+
 vim.api.nvim_create_user_command('SchemeToggle', function()
   vim.o.background = (vim.o.background == 'dark') and 'light' or 'dark'
   vim.cmd.colorscheme('everforest')
