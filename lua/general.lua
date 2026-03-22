@@ -288,20 +288,28 @@ vim.keymap.set("n", "<leader>fF", function() require('fff').find_in_git_root() e
 -- Telescope (grep, buffers, help)
 local builtin = require("telescope.builtin")
 vim.keymap.set('n', '<leader>fs', function()
-  vim.ui.input({ prompt = 'File glob (e.g. *.rb): ' }, function(glob)
-    if glob == nil then return end
-    local opts = {}
-    if glob ~= '' then
-      local g = glob:find('^%*%*/') and glob or ('**/' .. glob)
-      opts.additional_args = { '-g', g }
+  vim.ui.select({ 'String', 'RegExp' }, { prompt = 'Search mode:' }, function(mode)
+    mode = mode or 'String'  -- fallback to String on cancel
+    local args = {}
+    if mode == 'String' then
+      args[#args + 1] = '--fixed-strings'
     end
-    vim.ui.select({ 'String', 'RegExp' }, { prompt = 'Search mode:' }, function(mode)
-      if mode == nil then return end
-      if mode == 'String' then
-        opts.additional_args = opts.additional_args or {}
-        table.insert(opts.additional_args, '--fixed-strings')
+    vim.ui.input({ prompt = 'Include glob (e.g. *.rb, leave empty for all): ' }, function(inc)
+      if inc == nil then return end
+      if inc ~= '' then
+        local g = inc:find('^%*%*/') and inc or ('**/' .. inc)
+        args[#args + 1] = '-g'
+        args[#args + 1] = g
       end
-      builtin.live_grep(opts)
+      vim.ui.input({ prompt = 'Exclude glob (e.g. *.test.rb, leave empty to skip): ' }, function(excl)
+        if excl == nil then return end
+        if excl ~= '' then
+          local eg = excl:find('^%*%*/') and ('!' .. excl) or ('!**/' .. excl)
+          args[#args + 1] = '-g'
+          args[#args + 1] = eg
+        end
+        builtin.live_grep({ additional_args = #args > 0 and args or nil })
+      end)
     end)
   end)
 end, { desc = 'Live grep with mask' })
