@@ -21,6 +21,33 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost", "TextChanged", "TextCh
   end,
 })
 
+
+-- Rename file :Rename
+--
+vim.api.nvim_create_user_command("Rename", function(opts)
+  vim.cmd("saveas %:p:h/" .. opts.args)
+  vim.fn.delete(vim.fn.expand("#"))
+end, { nargs = 1 })
+
+-- Copy file :Copy [new_name] — clones current file, switches buffer to the copy
+vim.api.nvim_create_user_command("Copy", function(opts)
+  local stem = vim.fn.expand("%:t:r")
+  local ext = vim.fn.expand("%:e")
+  local default = stem .. "_copy" .. (ext ~= "" and "." .. ext or "")
+
+  local function do_copy(name)
+    if not name or name == "" then name = default end
+    vim.cmd("saveas %:p:h/" .. name)
+  end
+
+  if opts.args ~= "" then
+    do_copy(opts.args)
+  else
+    vim.ui.input({ prompt = "Copy as (default: " .. default .. "): " }, do_copy)
+  end
+end, { nargs = "?" })
+
+-- :SchemeToggle
 vim.api.nvim_create_user_command('SchemeToggle', function()
   vim.o.background = (vim.o.background == 'dark') and 'light' or 'dark'
   vim.cmd.colorscheme('everforest')
