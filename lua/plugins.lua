@@ -52,6 +52,9 @@ return {
         set_hl('DiagnosticOk', palette.green, palette.none)
         set_hl('NormalFloat', palette.none, palette.bg1)
         set_hl('FloatBorder', palette.yellow, palette.bg1)
+        -- Winbar: match statusline bg, underline for bottom border
+        set_hl('WinBar', palette.fg, palette.bg_blue)
+        set_hl('WinBarNC', palette.fg, palette.bg1)
         -- Make inactive windows slightly lighter than bg_dim so they don't look heavy
         set_hl('NormalNC', palette.fg, palette.bg1)
       end

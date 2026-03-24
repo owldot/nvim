@@ -14,6 +14,7 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 local ruler = require("functions.ruler")
+require("functions.header").setup()
 vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost", "TextChanged", "TextChangedI" }, {
   pattern = "*",
   callback = function()
