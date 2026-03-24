@@ -314,9 +314,20 @@ vim.keymap.set("n", "<leader>fF", function() require('fff').find_in_git_root() e
 
 -- Telescope (grep, buffers, help)
 local builtin = require("telescope.builtin")
+local last_grep = { args = nil, default_text = nil }
+
 vim.keymap.set('n', '<leader>fs', function()
-  vim.ui.select({ 'String', 'RegExp' }, { prompt = 'Search mode:' }, function(mode)
-    mode = mode or 'String'  -- fallback to String on cancel
+  vim.ui.select({ 'String', 'RegExp', 'Resume previous' }, { prompt = 'Search mode:' }, function(mode)
+    if mode == nil then return end
+
+    if mode == 'Resume previous' then
+      builtin.live_grep({
+        additional_args = last_grep.args,
+        default_text = last_grep.default_text,
+      })
+      return
+    end
+
     local args = {}
     if mode == 'String' then
       args[#args + 1] = '--fixed-strings'
@@ -335,7 +346,16 @@ vim.keymap.set('n', '<leader>fs', function()
           args[#args + 1] = '-g'
           args[#args + 1] = eg
         end
-        builtin.live_grep({ additional_args = #args > 0 and args or nil })
+        last_grep.args = #args > 0 and args or nil
+        last_grep.default_text = nil
+        builtin.live_grep({
+          additional_args = last_grep.args,
+          on_complete = {
+            function(picker)
+              last_grep.default_text = picker:_get_prompt()
+            end,
+          },
+        })
       end)
     end)
   end)

@@ -153,6 +153,29 @@ return {
   },
 
   {
+    'stevearc/oil.nvim',
+    config = function()
+      require('oil').setup({
+        default_file_explorer = true,
+        view_options = {
+          show_hidden = true,
+        },
+        keymaps = {
+          ["g?"] = "actions.show_help",
+          ["<CR>"] = "actions.select",
+          ["-"] = "actions.parent",
+          ["_"] = "actions.open_cwd",
+          ["`"] = "actions.cd",
+          ["gs"] = "actions.change_sort",
+          ["gx"] = "actions.open_external",
+          ["g."] = "actions.toggle_hidden",
+        },
+      })
+      vim.keymap.set('n', '-', '<CMD>Oil<CR>', { desc = 'Open parent directory' })
+    end,
+  },
+
+  {
     'dmtrKovalenko/fff.nvim',
     build = function()
       require("fff.download").download_or_build_binary()
