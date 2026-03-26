@@ -9,7 +9,7 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.opt_local.wrap = true
     vim.opt_local.linebreak = true
     vim.opt_local.breakindent = true
-    vim.opt.colorcolumn = "80"
+    vim.opt.colorcolumn = ""
   end,
 })
 
@@ -18,7 +18,10 @@ require("functions.header").setup()
 vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost", "TextChanged", "TextChangedI" }, {
   pattern = "*",
   callback = function()
-    ruler.draw_col80(vim.api.nvim_get_current_buf())
+    local buf = vim.api.nvim_get_current_buf()
+    local bt = vim.bo[buf].buftype
+    if bt == "nofile" or bt == "prompt" then return end
+    ruler.draw_col80(buf)
   end,
 })
 

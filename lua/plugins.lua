@@ -12,7 +12,7 @@ return {
     config = function()
       local telescope = require('telescope')
       telescope.setup({
-        extensions = {
+extensions = {
           fzf = {
             fuzzy = true,
             override_generic_sorter = true,
