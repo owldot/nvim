@@ -318,52 +318,9 @@ vim.keymap.set("n", "<leader>fF", function() require('fff').find_in_git_root() e
 
 -- Telescope (grep, buffers, help)
 local builtin = require("telescope.builtin")
-local last_grep = { args = nil, default_text = nil }
-
-vim.keymap.set('n', '<leader>fs', function()
-  vim.ui.select({ 'String', 'RegExp', 'Resume previous' }, { prompt = 'Search mode:' }, function(mode)
-    if mode == nil then return end
-
-    if mode == 'Resume previous' then
-      builtin.live_grep({
-        additional_args = last_grep.args,
-        default_text = last_grep.default_text,
-      })
-      return
-    end
-
-    local args = {}
-    if mode == 'String' then
-      args[#args + 1] = '--fixed-strings'
-    end
-    vim.ui.input({ prompt = 'Include glob (e.g. *.rb, leave empty for all): ' }, function(inc)
-      if inc == nil then return end
-      if inc ~= '' then
-        local g = inc:find('^%*%*/') and inc or ('**/' .. inc)
-        args[#args + 1] = '-g'
-        args[#args + 1] = g
-      end
-      vim.ui.input({ prompt = 'Exclude glob (e.g. *.test.rb, leave empty to skip): ' }, function(excl)
-        if excl == nil then return end
-        if excl ~= '' then
-          local eg = excl:find('^%*%*/') and ('!' .. excl) or ('!**/' .. excl)
-          args[#args + 1] = '-g'
-          args[#args + 1] = eg
-        end
-        last_grep.args = #args > 0 and args or nil
-        last_grep.default_text = nil
-        builtin.live_grep({
-          additional_args = last_grep.args,
-          on_complete = {
-            function(picker)
-              last_grep.default_text = picker:_get_prompt()
-            end,
-          },
-        })
-      end)
-    end)
-  end)
-end, { desc = 'Live grep with mask' })
+vim.keymap.set('n', '<leader>fs', function() require('spectre').toggle() end, { desc = 'Search (Spectre)' })
+vim.keymap.set('n', '<leader>fw', function() require('spectre').open_visual({ select_word = true }) end, { desc = 'Search current word (Spectre)' })
+vim.keymap.set('v', '<leader>fw', function() require('spectre').open_visual() end, { desc = 'Search selection (Spectre)' })
 vim.keymap.set("n", "<leader>fo", builtin.oldfiles, { desc = "Recent files" })
 vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "Buffers" })
 vim.keymap.set("n", "<leader>fh", builtin.help_tags, { desc = "Help" })
