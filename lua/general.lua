@@ -236,6 +236,9 @@ vim.opt.sessionoptions = {
   "winsize",   -- window sizes
 }
 
+-- Defaul buffer layout
+vim.opt.splitbelow = true -- Open horizontal splits below
+vim.opt.splitright = true -- Open vertical splits to the right
 
 -- Keymaps
 vim.keymap.set("v", "<leader>p", "\"_dP") -- paste without replacing register
@@ -301,6 +304,9 @@ vim.keymap.set('t', '<C-h>', [[<C-\><C-n><C-w>h]], { silent = true })
 vim.keymap.set('t', '<C-j>', [[<C-\><C-n><C-w>j]], { silent = true })
 vim.keymap.set('t', '<C-k>', [[<C-\><C-n><C-w>k]], { silent = true })
 vim.keymap.set('t', '<C-l>', [[<C-\><C-n><C-w>l]], { silent = true })
+
+-- Opens terminal in the vertical split
+vim.api.nvim_create_user_command('Vterm', 'vert term', {})
 
 -- Insert mode word motions
 vim.keymap.set('i', '<C-f>', '<C-o>w')
