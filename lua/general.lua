@@ -293,13 +293,14 @@ vim.keymap.set('n', '<leader>x', ':bd<CR>')
 -- map <leader><CR> to insert a blank line
 vim.keymap.set('n', '<leader><CR>', 'o<Esc>', { silent = true, desc = 'Insert blank line' })
 
--- Exit terminal mode
-vim.keymap.set('t', '<C-w>h', "<C-\\><C-n><C-w>h",{silent = true})
-vim.keymap.set('t', '<C-w>j', "<C-\\><C-n><C-w>j",{silent = true})
-vim.keymap.set('t', '<C-w>k', "<C-\\><C-n><C-w>k",{silent = true})
-vim.keymap.set('t', '<C-w>l', "<C-\\><C-n><C-w>l",{silent = true})
-vim.keymap.set('t', '<C-w>w', "<C-\\><C-n><C-w>w",{silent = true})
-vim.keymap.set('t', '<C-w><C-w>', "<C-\\><C-n><C-w><C-w>",{silent = true})
+-- Exit terminal mode with Escape
+vim.keymap.set('t', '<Esc>', [[<C-\><C-n>]], { desc = 'Exit terminal mode' })
+
+-- Optional: Easy navigation out of terminal windows
+vim.keymap.set('t', '<C-h>', [[<C-\><C-n><C-w>h]], { silent = true })
+vim.keymap.set('t', '<C-j>', [[<C-\><C-n><C-w>j]], { silent = true })
+vim.keymap.set('t', '<C-k>', [[<C-\><C-n><C-w>k]], { silent = true })
+vim.keymap.set('t', '<C-l>', [[<C-\><C-n><C-w>l]], { silent = true })
 
 -- Insert mode word motions
 vim.keymap.set('i', '<C-f>', '<C-o>w')

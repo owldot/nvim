@@ -24,4 +24,5 @@ require("lazy").setup(require("plugins"))
 -- Load configuration
 require("general")
 require("lsp")
+require("buffer_copy_paste")
 
