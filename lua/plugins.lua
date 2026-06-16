@@ -59,8 +59,7 @@ extensions = {
         -- Winbar: match statusline bg, underline for bottom border
         set_hl('WinBar', palette.fg, palette.bg_blue)
         set_hl('WinBarNC', palette.fg, palette.bg1)
-        -- Make inactive windows slightly lighter than bg_dim so they don't look heavy
-        set_hl('NormalNC', palette.fg, palette.bg1)
+        set_hl('NormalNC', palette.fg, palette.bg3)
       end
 
       vim.api.nvim_create_autocmd('ColorScheme', {
