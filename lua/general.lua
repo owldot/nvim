@@ -296,6 +296,10 @@ vim.keymap.set('n', '<leader>x', ':bd<CR>')
 -- map <leader><CR> to insert a blank line
 vim.keymap.set('n', '<leader><CR>', 'o<Esc>', { silent = true, desc = 'Insert blank line' })
 
+-- Insert mode
+vim.keymap.set("i", "<C-a>", "<Home>", { desc = "Jump to beginning of line" })
+vim.keymap.set("i", "<C-e>", "<End>", { desc = "Jump to end of line" })
+
 -- Exit terminal mode with Escape
 vim.keymap.set('t', '<Esc>', [[<C-\><C-n>]], { desc = 'Exit terminal mode' })
 
