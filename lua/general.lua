@@ -305,7 +305,8 @@ vim.keymap.set('t', '<Esc>', [[<C-\><C-n>]], { desc = 'Exit terminal mode' })
 
 -- Optional: Easy navigation out of terminal windows
 vim.keymap.set('t', '<C-h>', [[<C-\><C-n><C-w>h]], { silent = true })
-vim.keymap.set('t', '<C-j>', [[<C-\><C-n><C-w>j]], { silent = true })
+-- Disabled: this also catches Shift-Enter in terminal buffers on terminals that send LF.
+-- vim.keymap.set('t', '<C-j>', [[<C-\><C-n><C-w>j]], { silent = true })
 vim.keymap.set('t', '<C-k>', [[<C-\><C-n><C-w>k]], { silent = true })
 vim.keymap.set('t', '<C-l>', [[<C-\><C-n><C-w>l]], { silent = true })
 
