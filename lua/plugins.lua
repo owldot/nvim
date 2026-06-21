@@ -11,8 +11,27 @@ return {
     },
     config = function()
       local telescope = require('telescope')
+      local actions = require('telescope.actions')
+
       telescope.setup({
-extensions = {
+        defaults = {
+          preview = {
+            line_number = true,
+          },
+
+          mappings = {
+            i = {
+              -- Send to quickfix and open it with Leader + q in insert mode
+              ["<Leader>q"] = actions.send_to_qflist + actions.open_qflist,
+            },
+            n = {
+              -- Send to quickfix and open it with Leader + q in normal mode
+              ["<Leader>q"] = actions.send_to_qflist + actions.open_qflist,
+            },
+          },
+        },
+
+        extensions = {
           fzf = {
             fuzzy = true,
             override_generic_sorter = true,

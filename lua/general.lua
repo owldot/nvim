@@ -255,9 +255,6 @@ vim.keymap.set("n", "xx", "dd")
 
 vim.keymap.set("n", "<leader>o", ":Ex<CR>", { silent = true })
 
-vim.keymap.set("n", "[b", ":bp<CR>", { silent = true })
-vim.keymap.set("n", "]b", ":bn<CR>", { silent = true })
-
 -- Visual surround: select text, press S, type wrap character
 vim.keymap.set("v", "S", function()
   local char = vim.fn.getcharstr()
@@ -293,13 +290,6 @@ vim.keymap.set("n", "<Esc>", ":nohlsearch<CR>")
 -- delete buffer
 vim.keymap.set('n', '<leader>x', ':bd<CR>')
 
--- map <leader><CR> to insert a blank line
-vim.keymap.set('n', '<leader><CR>', 'o<Esc>', { silent = true, desc = 'Insert blank line' })
-
--- quickfix list
-vim.keymap.set("n", "<C-n>", ":cn", { desc = "Next in quickfix list" })
-vim.keymap.set("n", "<C-p>", ":cp", { desc = "Prev in quickfix list" })
-
 -- Insert mode
 vim.keymap.set("i", "<C-a>", "<Home>", { desc = "Jump to beginning of line" })
 vim.keymap.set("i", "<C-e>", "<End>", { desc = "Jump to end of line" })
@@ -313,9 +303,6 @@ vim.keymap.set('t', '<C-h>', [[<C-\><C-n><C-w>h]], { silent = true })
 -- vim.keymap.set('t', '<C-j>', [[<C-\><C-n><C-w>j]], { silent = true })
 vim.keymap.set('t', '<C-k>', [[<C-\><C-n><C-w>k]], { silent = true })
 vim.keymap.set('t', '<C-l>', [[<C-\><C-n><C-w>l]], { silent = true })
-
--- Opens terminal in the vertical split
-vim.api.nvim_create_user_command('Vterm', 'vert term', {})
 
 -- Insert mode word motions
 vim.keymap.set('i', '<C-f>', '<C-o>w')
