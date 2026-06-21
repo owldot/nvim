@@ -296,6 +296,10 @@ vim.keymap.set('n', '<leader>x', ':bd<CR>')
 -- map <leader><CR> to insert a blank line
 vim.keymap.set('n', '<leader><CR>', 'o<Esc>', { silent = true, desc = 'Insert blank line' })
 
+-- quickfix list
+vim.keymap.set("n", "<C-n>", ":cn", { desc = "Next in quickfix list" })
+vim.keymap.set("n", "<C-p>", ":cp", { desc = "Prev in quickfix list" })
+
 -- Insert mode
 vim.keymap.set("i", "<C-a>", "<Home>", { desc = "Jump to beginning of line" })
 vim.keymap.set("i", "<C-e>", "<End>", { desc = "Jump to end of line" })
