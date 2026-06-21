@@ -63,6 +63,23 @@ vim.opt.clipboard = "unnamedplus"
 
 vim.keymap.set("n", "<leader>cf", ":let @+ = expand(\"%\")<CR>")
 
+-- quickfix list
+-- Auto-loop next quickfix item
+vim.keymap.set('n', ']q', function()
+  local success = pcall(vim.cmd, 'cnext')
+  if not success then
+    vim.cmd('cfirst') -- Wrap around to the beginning
+  end
+end, { desc = 'Next quickfix item (with wrap)' })
+
+-- Auto-loop previous quickfix item
+vim.keymap.set('n', '[q', function()
+  local success = pcall(vim.cmd, 'cprev')
+  if not success then
+    vim.cmd('clast') -- Wrap around to the end
+  end
+end, { desc = 'Previous quickfix item (with wrap)' })
+
 -- Mouse
 vim.opt.mouse = "a"
 
