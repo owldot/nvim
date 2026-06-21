@@ -286,4 +286,13 @@ return {
       })
     end,
   },
+
+  {
+    dir = vim.fn.expand("~/pinterm.nvim"),
+    name = "pinterm",
+    cmd = { "ST", "SNT", "STR" },
+    config = function()
+      require("pinterm").setup()
+    end,
+  },
 }
