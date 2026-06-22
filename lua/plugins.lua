@@ -21,12 +21,16 @@ return {
 
           mappings = {
             i = {
-              -- Send to quickfix and open it with Leader + q in insert mode
-              ["<Leader>q"] = actions.send_to_qflist + actions.open_qflist,
+              ["<Leader>q"] = function(bufnr)
+                actions.send_to_qflist(bufnr)
+                actions.open_qflist(bufnr)
+              end,
             },
             n = {
-              -- Send to quickfix and open it with Leader + q in normal mode
-              ["<Leader>q"] = actions.send_to_qflist + actions.open_qflist,
+              ["<Leader>q"] = function(bufnr)
+                actions.send_to_qflist(bufnr)
+                actions.open_qflist(bufnr)
+              end,
             },
           },
         },
@@ -288,8 +292,7 @@ return {
   },
 
   {
-    dir = vim.fn.expand("~/pinterm.nvim"),
-    name = "pinterm",
+    "lanadz/pinterm.nvim",
     cmd = { "ST", "SNT", "STR" },
     config = function()
       require("pinterm").setup()
