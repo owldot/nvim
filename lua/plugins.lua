@@ -293,7 +293,7 @@ return {
 
   {
     "lanadz/pinterm.nvim",
-    cmd = { "ST", "SNT", "STR" },
+    cmd = { "Pt", "Ptn", "Ptr" },
     config = function()
       require("pinterm").setup()
     end,
