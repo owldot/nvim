@@ -243,14 +243,22 @@ return {
             vim.keymap.set(mode, l, r, opts)
           end
 
-          -- Navigation
+          -- Navigation (target = 'all' so staged hunks are included too)
           map('n', '[g', function()
             if vim.wo.diff then
               vim.cmd.normal({']c', bang = true})
             else
-              gitsigns.nav_hunk('next')
+              gitsigns.nav_hunk('next', { target = 'all' })
             end
           end, { desc = 'Next hunk' })
+
+          map('n', ']g', function()
+            if vim.wo.diff then
+              vim.cmd.normal({'[c', bang = true})
+            else
+              gitsigns.nav_hunk('prev', { target = 'all' })
+            end
+          end, { desc = 'Previous hunk' })
 
           map('n', '<leader>gb', function()
             gitsigns.blame_line({ full = true })
@@ -280,7 +288,15 @@ return {
             end)
           end, { desc = 'Diff this' })
 
-          map('n', '<leader>ga', gitsigns.stage_hunk, { desc = 'Stage hunk' })
+          map({ 'n', 'v' }, '<leader>ga', gitsigns.stage_hunk, { desc = 'Stage/unstage hunk' })
+          map('n', '<leader>gg', function()
+            local hunks = gitsigns.get_hunks(bufnr)
+            if hunks and #hunks > 0 then
+              gitsigns.stage_buffer()       -- unstaged hunks exist -> stage them all
+            else
+              gitsigns.reset_buffer_index() -- nothing left unstaged -> unstage buffer
+            end
+          end, { desc = 'Stage/unstage whole buffer' })
         end
       })
     end,
