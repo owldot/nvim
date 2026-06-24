@@ -336,8 +336,8 @@ vim.api.nvim_create_user_command('WQ', 'wq', {})
 vim.keymap.set("n", "<leader>ff", function() require('fff').find_files() end, { desc = "Find files (fff)" })
 vim.keymap.set("n", "<leader>fF", function() require('fff').find_in_git_root() end, { desc = "Find files in git root (fff)" })
 
--- Telescope (grep, buffers, help)
-local builtin = require("telescope.builtin")
+-- Telescope (grep, buffers, help) -- lazy: require inside callbacks so the
+-- plugin only loads on first use (lazy.nvim hooks require to auto-load it).
 local function toggle_spectre()
   local found_spectre_window = false
 
@@ -363,11 +363,11 @@ end
 vim.keymap.set('n', '<leader>fs', toggle_spectre, { desc = 'Search (Spectre)' })
 vim.keymap.set('n', '<leader>fw', function() require('spectre').open_visual({ select_word = true }) end, { desc = 'Search current word (Spectre)' })
 vim.keymap.set('v', '<leader>fw', function() require('spectre').open_visual() end, { desc = 'Search selection (Spectre)' })
-vim.keymap.set("n", "<leader>fo", builtin.oldfiles, { desc = "Recent files" })
-vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "Buffers" })
-vim.keymap.set("n", "<leader>fh", builtin.help_tags, { desc = "Help" })
-vim.keymap.set("n", "<leader>ft", builtin.git_files, { desc = "Git files" })
-vim.keymap.set('n', '<leader>gs', builtin.git_status, { desc = '[G]it [S]tatus' })
+vim.keymap.set("n", "<leader>fo", function() require("telescope.builtin").oldfiles() end, { desc = "Recent files" })
+vim.keymap.set("n", "<leader>fb", function() require("telescope.builtin").buffers() end, { desc = "Buffers" })
+vim.keymap.set("n", "<leader>fh", function() require("telescope.builtin").help_tags() end, { desc = "Help" })
+vim.keymap.set("n", "<leader>ft", function() require("telescope.builtin").git_files() end, { desc = "Git files" })
+vim.keymap.set('n', '<leader>gs', function() require("telescope.builtin").git_status() end, { desc = '[G]it [S]tatus' })
 
 -- Convenient omni-completion trigger (maps <C-c> to Ctrl-x Ctrl-o)
 vim.keymap.set("i", "<C-c>", function()

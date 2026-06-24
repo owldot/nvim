@@ -1,6 +1,7 @@
 return {
   {
     "nvim-telescope/telescope.nvim",
+    cmd = "Telescope",
     dependencies = {
       "nvim-lua/plenary.nvim",
       {
@@ -51,6 +52,7 @@ return {
 
   {
     "nvim-pack/nvim-spectre",
+    cmd = "Spectre",
     dependencies = { "nvim-lua/plenary.nvim" },
     config = function()
       require('spectre').setup({
@@ -222,24 +224,6 @@ return {
   },
 
   {
-    "ThePrimeagen/harpoon",
-    branch = "harpoon2",
-    dependencies = { "nvim-lua/plenary.nvim" },
-    config = function()
-      local harpoon = require("harpoon")
-      harpoon:setup()
-
-      vim.keymap.set("n", "<leader>a", function() harpoon:list():add() end, { desc = "Harpoon add" })
-      vim.keymap.set("n", "<C-e>", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end, { desc = "Harpoon menu" })
-
-      vim.keymap.set("n", "<leader>1", function() harpoon:list():select(1) end, { desc = "Harpoon 1" })
-      vim.keymap.set("n", "<leader>2", function() harpoon:list():select(2) end, { desc = "Harpoon 2" })
-      vim.keymap.set("n", "<leader>3", function() harpoon:list():select(3) end, { desc = "Harpoon 3" })
-      vim.keymap.set("n", "<leader>4", function() harpoon:list():select(4) end, { desc = "Harpoon 4" })
-    end,
-  },
-
-  {
     "lewis6991/gitsigns.nvim",
     config = function()
       require('gitsigns').setup({
@@ -307,6 +291,25 @@ return {
     cmd = { "Pt", "Ptn", "Ptr" },
     config = function()
       require("pinterm").setup()
+    end,
+  },
+
+  {
+    "lanadz/vimseq",
+    config = function()
+      require("vimseq").setup({
+        -- vimseq expects the Logseq graph root; journals live under journals_dir.
+        graph_dir = "~/logseq",
+        journals_dir = "journals",
+      })
+
+      vim.api.nvim_create_user_command("VT", function()
+        vim.cmd.VimseqToday()
+      end, { desc = "Alias for VimseqToday" })
+
+      vim.api.nvim_create_user_command("VST", function(args)
+        require("vimseq.search").tag(args.args)
+      end, { nargs = "+", desc = "Alias for VimseqSearchByTag" })
     end,
   },
 }
