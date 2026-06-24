@@ -266,17 +266,29 @@ return {
 
           map('n', '<leader>gd', function()
             local orig_win = vim.api.nvim_get_current_win()
+            local before = vim.api.nvim_tabpage_list_wins(0)
             gitsigns.diffthis()
             vim.schedule(function()
-              local new_win = vim.api.nvim_get_current_win()
-              -- If gitsigns left us in the original, switch to the diff split
-              if new_win == orig_win then
-                vim.cmd('wincmd p')
+              -- the diff window is whichever one didn't exist before
+              local diff_win
+              for _, w in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+                if not vim.tbl_contains(before, w) then
+                  diff_win = w
+                  break
+                end
               end
-              -- When this diff window closes, turn off diff on the original
+              if not diff_win then return end
+
+              vim.api.nvim_set_current_win(diff_win)
+
+              -- q closes the diff scratch buffer
+              vim.keymap.set('n', 'q', '<cmd>close<cr>',
+                { buffer = vim.api.nvim_win_get_buf(diff_win), nowait = true })
+
+              -- when the diff window closes, drop diff mode on the original
               vim.api.nvim_create_autocmd('WinClosed', {
                 once = true,
-                pattern = tostring(vim.api.nvim_get_current_win()),
+                pattern = tostring(diff_win),
                 callback = function()
                   if vim.api.nvim_win_is_valid(orig_win) then
                     vim.api.nvim_win_call(orig_win, function()
@@ -297,6 +309,10 @@ return {
               gitsigns.reset_buffer_index() -- nothing left unstaged -> unstage buffer
             end
           end, { desc = 'Stage/unstage whole buffer' })
+
+          -- Hunks (diffs) -> quickfix
+          map('n', '<leader>gq', gitsigns.setqflist, { desc = 'Buffer hunks to quickfix' })
+          map('n', '<leader>gQ', function() gitsigns.setqflist('all') end, { desc = 'All repo hunks to quickfix' })
         end
       })
     end,
