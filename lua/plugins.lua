@@ -52,6 +52,17 @@ return {
   {
     "nvim-pack/nvim-spectre",
     dependencies = { "nvim-lua/plenary.nvim" },
+    config = function()
+      require('spectre').setup({
+        mapping = {
+          close = {
+            map = 'q',
+            cmd = "<cmd>lua require('spectre').close()<CR>",
+            desc = 'Close Spectre',
+          },
+        },
+      })
+    end,
   },
 
   {

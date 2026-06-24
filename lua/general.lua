@@ -338,7 +338,29 @@ vim.keymap.set("n", "<leader>fF", function() require('fff').find_in_git_root() e
 
 -- Telescope (grep, buffers, help)
 local builtin = require("telescope.builtin")
-vim.keymap.set('n', '<leader>fs', function() require('spectre').toggle() end, { desc = 'Search (Spectre)' })
+local function toggle_spectre()
+  local found_spectre_window = false
+
+  for _, tabpage in ipairs(vim.api.nvim_list_tabpages()) do
+    for _, win in ipairs(vim.api.nvim_tabpage_list_wins(tabpage)) do
+      if vim.api.nvim_win_is_valid(win) then
+        local buf = vim.api.nvim_win_get_buf(win)
+        if vim.bo[buf].filetype == 'spectre_panel' then
+          found_spectre_window = true
+          pcall(vim.api.nvim_win_close, win, true)
+        end
+      end
+    end
+  end
+
+  if found_spectre_window then
+    pcall(function() require('spectre').close() end)
+  else
+    require('spectre').open()
+  end
+end
+
+vim.keymap.set('n', '<leader>fs', toggle_spectre, { desc = 'Search (Spectre)' })
 vim.keymap.set('n', '<leader>fw', function() require('spectre').open_visual({ select_word = true }) end, { desc = 'Search current word (Spectre)' })
 vim.keymap.set('v', '<leader>fw', function() require('spectre').open_visual() end, { desc = 'Search selection (Spectre)' })
 vim.keymap.set("n", "<leader>fo", builtin.oldfiles, { desc = "Recent files" })
