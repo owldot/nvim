@@ -313,6 +313,10 @@ return {
           -- Hunks (diffs) -> quickfix
           map('n', '<leader>gq', gitsigns.setqflist, { desc = 'Buffer hunks to quickfix' })
           map('n', '<leader>gQ', function() gitsigns.setqflist('all') end, { desc = 'All repo hunks to quickfix' })
+
+          -- Reset (discard) changes
+          map({ 'n', 'v' }, '<leader>gx', gitsigns.reset_hunk, { desc = 'Reset (discard) hunk' })
+          map('n', '<leader>gX', gitsigns.reset_buffer, { desc = 'Reset (discard) whole buffer' })
         end
       })
     end,
