@@ -25,4 +25,5 @@ require("lazy").setup(require("plugins"))
 require("general")
 require("lsp")
 require("buffer_copy_paste")
+require("tts")
 

@@ -346,6 +346,22 @@ return {
       vim.api.nvim_create_user_command("VST", function(args)
         require("vimseq.search").tag(args.args)
       end, { nargs = "+", desc = "Alias for VimseqSearchByTag" })
+
+      vim.keymap.set("n", "<leader>vt", function()
+        vim.cmd.VimseqToday()
+      end, { desc = "Vimseq today" })
+
+      vim.keymap.set("n", "<leader>vs", function()
+        vim.ui.input({ prompt = "Tag: " }, function(input)
+          if input and vim.trim(input) ~= "" then
+            require("vimseq.search").tag(input)
+          end
+        end)
+      end, { desc = "Vimseq search by tag" })
+
+      vim.keymap.set("n", "<leader>vb", function()
+        vim.cmd.VimseqBrowse()
+      end, { desc = "Vimseq browse" })
     end,
   },
 }
