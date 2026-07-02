@@ -26,4 +26,4 @@ require("general")
 require("lsp")
 require("buffer_copy_paste")
 require("tts")
-
+require("surround")
