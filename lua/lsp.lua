@@ -90,8 +90,25 @@ vim.api.nvim_create_autocmd("LspAttach", {
     local opts = { buffer = ev.buf }
     local client = vim.lsp.get_client_by_id(ev.data.client_id)
 
+    -- Open definition in a split (vertical: <C-w>gd, horizontal: <C-w>gD).
+    -- Uses on_list so no split is opened when there's no result.
+    local function definition_in_split(split_cmd)
+      return function()
+        vim.lsp.buf.definition({
+          on_list = function(list)
+            if not list.items or vim.tbl_isempty(list.items) then return end
+            vim.cmd(split_cmd)
+            vim.fn.setqflist({}, " ", list)
+            vim.cmd("cfirst")
+          end,
+        })
+      end
+    end
+
     -- Navigation
     vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+    vim.keymap.set("n", "<C-w>gd", definition_in_split("vsplit"), opts)
+    vim.keymap.set("n", "<C-w>gD", definition_in_split("split"), opts)
     vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
     vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
     vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
