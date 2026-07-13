@@ -337,6 +337,8 @@ return {
         -- vimseq expects the Logseq graph root; journals live under journals_dir.
         graph_dir = "~/logseq",
         journals_dir = "journals",
+        -- Keep Enter as a normal Markdown newline: no vimseq auto bullets or block-indent guessing.
+        enable_mappings = false,
       })
 
       vim.api.nvim_create_user_command("VT", function()
