@@ -352,8 +352,23 @@ local function toggle_spectre()
 end
 
 vim.keymap.set('n', '<leader>fs', toggle_spectre, { desc = 'Search (Spectre)' })
-vim.keymap.set('n', '<leader>fw', function() require('spectre').open_visual({ select_word = true }) end, { desc = 'Search current word (Spectre)' })
-vim.keymap.set('v', '<leader>fw', function() require('spectre').open_visual() end, { desc = 'Search selection (Spectre)' })
+
+local function grep_string(search)
+  require('telescope.builtin').grep_string({
+    search = search,
+    prompt_title = "Find in selection (" .. search:gsub("\n", "\\n") .. ")",
+  })
+end
+
+vim.keymap.set('n', '<leader>fw', function()
+  grep_string(vim.fn.expand('<cword>'))
+end, { desc = 'Grep current word (literal)' })
+
+vim.keymap.set('v', '<leader>fw', function()
+  local selection = vim.fn.getregion(vim.fn.getpos('v'), vim.fn.getpos('.'), { type = vim.fn.mode() })
+  grep_string(table.concat(selection, '\n'))
+end, { desc = 'Grep selection (literal)' })
+
 vim.keymap.set("n", "<leader>fo", function() require("telescope.builtin").oldfiles() end, { desc = "Recent files" })
 vim.keymap.set("n", "<leader>fb", function() require("telescope.builtin").buffers() end, { desc = "Buffers" })
 vim.keymap.set("n", "<leader>fh", function() require("telescope.builtin").help_tags() end, { desc = "Help" })
