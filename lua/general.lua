@@ -120,6 +120,10 @@ vim.opt.showmode = false  -- Hide default mode indicator
 vim.opt.hlsearch = false
 vim.opt.incsearch = true
 
+vim.keymap.set("n", "<leader>hl", function()
+  vim.opt.hlsearch = not vim.opt.hlsearch:get()
+end, { desc = "Toggle search highlight" })
+
 _G.stl_git = function()
   local head = vim.b.gitsigns_head
   if head and head ~= ".invalid" then
