@@ -315,12 +315,11 @@ vim.api.nvim_create_user_command('Q', 'q', {})
 vim.api.nvim_create_user_command('Wq', 'wq', {})
 vim.api.nvim_create_user_command('WQ', 'wq', {})
 
--- fff.nvim (fast file finder)
-vim.keymap.set("n", "<leader>ff", function() require('fff').find_files() end, { desc = "Find files (fff)" })
-vim.keymap.set("n", "<leader>fF", function() require('fff').find_in_git_root() end, { desc = "Find files in git root (fff)" })
-
 -- Telescope (grep, buffers, help) -- lazy: require inside callbacks so the
 -- plugin only loads on first use (lazy.nvim hooks require to auto-load it).
+vim.keymap.set("n", "<leader>ff", function() require("fff").find_files() end, { desc = "Find files (fff)" })
+vim.keymap.set("n", "<leader>fF", function() require("fff").find_files({ cwd = vim.fn.systemlist("git rev-parse --show-toplevel")[1] }) end, { desc = "Find files in git root (fff)" })
+
 local function toggle_spectre()
   local found_spectre_window = false
 
@@ -349,7 +348,6 @@ vim.keymap.set('v', '<leader>fw', function() require('spectre').open_visual() en
 vim.keymap.set("n", "<leader>fo", function() require("telescope.builtin").oldfiles() end, { desc = "Recent files" })
 vim.keymap.set("n", "<leader>fb", function() require("telescope.builtin").buffers() end, { desc = "Buffers" })
 vim.keymap.set("n", "<leader>fh", function() require("telescope.builtin").help_tags() end, { desc = "Help" })
-vim.keymap.set("n", "<leader>ft", function() require("telescope.builtin").git_files() end, { desc = "Git files" })
 vim.keymap.set('n', '<leader>gs', function() require("telescope.builtin").git_status() end, { desc = '[G]it [S]tatus' })
 
 -- Convenient omni-completion trigger (maps <C-c> to Ctrl-x Ctrl-o)

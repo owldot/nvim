@@ -41,15 +41,16 @@ vim.lsp.config.ruby_lsp = {
     },
   },
 }
-vim.lsp.enable({ "ruby_lsp" })
+-- vim.lsp.enable({ "ruby_lsp" })
 
 -- Sorbet
 
 vim.lsp.config.sorbet = {
-  cmd = { "srb", "tc", "--lsp" },
-  root_markers = { "sorbet/" },
+  cmd = { "srb", "tc", "--lsp", "--cache-dir=.sorbet-cache" },
+  root_markers = { "sorbet/config", "sorbet/" },
   filetypes = { "ruby" },
   capabilities = caps,
+  highlightUntyped = false,
 }
 vim.lsp.enable({ "sorbet" })
 
@@ -72,7 +73,7 @@ vim.lsp.enable({ "rust_analyzer" })
 vim.diagnostic.config({
   signs = true,
   underline = true,
-  update_in_insert = true,
+  update_in_insert = false,
   severity_sort = true,
   float = {
     border = "single",
