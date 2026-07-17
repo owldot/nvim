@@ -159,7 +159,12 @@ _G.stl_lsp = function()
 
   local names = {}
   for _, c in ipairs(clients) do
-    names[#names + 1] = c.name
+    local name = c.name
+    if c.name == "sorbet" and type(_G.sorbet_operation_status) == "function" then
+      local operation = _G.sorbet_operation_status(c.id)
+      name = operation and ("sorbet: " .. operation) or "sorbet: idle"
+    end
+    names[#names + 1] = name
   end
   return " [" .. table.concat(names, ",") .. "] "
 end
@@ -348,7 +353,14 @@ vim.keymap.set('v', '<leader>fw', function() require('spectre').open_visual() en
 vim.keymap.set("n", "<leader>fo", function() require("telescope.builtin").oldfiles() end, { desc = "Recent files" })
 vim.keymap.set("n", "<leader>fb", function() require("telescope.builtin").buffers() end, { desc = "Buffers" })
 vim.keymap.set("n", "<leader>fh", function() require("telescope.builtin").help_tags() end, { desc = "Help" })
-vim.keymap.set('n', '<leader>gs', function() require("telescope.builtin").git_status() end, { desc = '[G]it [S]tatus' })
+vim.keymap.set('n', '<leader>gs', function()
+  require("telescope.builtin").git_status({
+    -- Telescope otherwise jumps to the monorepo root and expands every
+    -- untracked directory, which is very expensive in world.
+    use_git_root = false,
+    expand_dir = false,
+  })
+end, { desc = '[G]it [S]tatus (cwd)' })
 
 -- Convenient omni-completion trigger (maps <C-c> to Ctrl-x Ctrl-o)
 vim.keymap.set("i", "<C-c>", function()

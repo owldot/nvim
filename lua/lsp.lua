@@ -45,12 +45,42 @@ vim.lsp.config.ruby_lsp = {
 
 -- Sorbet
 
+local sorbet_operations = {}
+
+local function handle_sorbet_operation(_, params, ctx)
+  if not params or not ctx then return end
+
+  local operations = sorbet_operations[ctx.client_id] or {}
+  if params.status == "end" then
+    operations = vim.tbl_filter(function(operation)
+      return operation.operationName ~= params.operationName
+    end, operations)
+  else
+    operations[#operations + 1] = params
+  end
+  sorbet_operations[ctx.client_id] = operations
+
+  vim.schedule(function() vim.cmd.redrawstatus() end)
+end
+
+_G.sorbet_operation_status = function(client_id)
+  local operations = sorbet_operations[client_id]
+  local operation = operations and operations[#operations]
+  return operation and (operation.description or operation.operationName) or nil
+end
+
 vim.lsp.config.sorbet = {
   cmd = { "srb", "tc", "--lsp", "--cache-dir=.sorbet-cache" },
-  root_markers = { "sorbet/config", "sorbet/" },
+  root_markers = { "sorbet" },
   filetypes = { "ruby" },
   capabilities = caps,
-  highlightUntyped = false,
+  init_options = {
+    supportsOperationNotifications = true,
+    highlightUntyped = false,
+  },
+  handlers = {
+    ["sorbet/showOperation"] = handle_sorbet_operation,
+  },
 }
 vim.lsp.enable({ "sorbet" })
 
