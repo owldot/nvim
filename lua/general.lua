@@ -353,6 +353,11 @@ vim.keymap.set('v', '<leader>fw', function() require('spectre').open_visual() en
 vim.keymap.set("n", "<leader>fo", function() require("telescope.builtin").oldfiles() end, { desc = "Recent files" })
 vim.keymap.set("n", "<leader>fb", function() require("telescope.builtin").buffers() end, { desc = "Buffers" })
 vim.keymap.set("n", "<leader>fh", function() require("telescope.builtin").help_tags() end, { desc = "Help" })
+vim.keymap.set("n", "<leader>fg", function()
+  require("telescope.builtin").live_grep({
+    additional_args = { "--fixed-strings" },
+  })
+end, { desc = "Live grep (literal)" })
 vim.keymap.set('n', '<leader>gs', function()
   require("telescope.builtin").git_status({
     -- Telescope otherwise jumps to the monorepo root and expands every
