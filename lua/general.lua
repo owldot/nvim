@@ -378,12 +378,34 @@ vim.keymap.set("n", "<leader>fg", function()
   })
 end, { desc = "Live grep (literal)" })
 vim.keymap.set('n', '<leader>gs', function()
-  require("telescope.builtin").git_status({
+  local cwd = vim.uv.cwd()
+  local prefix_result = vim.system(
+    { "git", "rev-parse", "--show-prefix" },
+    { cwd = cwd, text = true }
+  ):wait()
+  local git_prefix = prefix_result.code == 0 and (prefix_result.stdout or ""):gsub("[\r\n]+$", "") or ""
+
+  local opts = {
+    cwd = cwd,
     -- Telescope otherwise jumps to the monorepo root and expands every
     -- untracked directory, which is very expensive in world.
     use_git_root = false,
     expand_dir = false,
-  })
+  }
+
+  -- `git status -z` always reports paths relative to the repository root,
+  -- while this picker runs from `cwd`. Convert them back to cwd-relative paths
+  -- so previews, opening files, and staging actions all target the real file.
+  local make_entry = require("telescope.make_entry").gen_from_git_status(opts)
+  opts.entry_maker = function(line)
+    local status, path = line:match("^(..) (.*)$")
+    if status and git_prefix ~= "" and vim.startswith(path, git_prefix) then
+      line = status .. " " .. path:sub(#git_prefix + 1)
+    end
+    return make_entry(line)
+  end
+
+  require("telescope.builtin").git_status(opts)
 end, { desc = '[G]it [S]tatus (cwd)' })
 
 -- Convenient omni-completion trigger (maps <C-c> to Ctrl-x Ctrl-o)
