@@ -306,6 +306,11 @@ vim.keymap.set("i", "<C-e>", "<End>", { desc = "Jump to end of line" })
 -- Exit terminal mode with Escape
 vim.keymap.set('t', '<Esc>', [[<C-\><C-n>]], { desc = 'Exit terminal mode' })
 
+-- Layout-proof alternative to <C-\><C-n>: Ctrl+backslash does not produce 0x1C
+-- on the Canadian / Ukrainian-PC layouts, so ctrl+letter is used instead.
+-- (Also mapped buffer-locally in agent terminals, where <Esc> is passed through.)
+vim.keymap.set('t', '<C-q>', [[<C-\><C-n>]], { desc = 'Exit terminal mode (layout-safe)' })
+
 -- Optional: Easy navigation out of terminal windows
 vim.keymap.set('t', '<C-h>', [[<C-\><C-n><C-w>h]], { silent = true })
 -- Disabled: this also catches Shift-Enter in terminal buffers on terminals that send LF.
