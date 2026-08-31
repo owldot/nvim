@@ -301,7 +301,7 @@ return {
           end, { desc = 'Diff this' })
 
           map({ 'n', 'v' }, '<leader>ga', gitsigns.stage_hunk, { desc = 'Stage/unstage hunk' })
-          map('n', '<leader>gg', function()
+          map('n', '<leader>gA', function()
             local hunks = gitsigns.get_hunks(bufnr)
             if hunks and #hunks > 0 then
               gitsigns.stage_buffer()       -- unstaged hunks exist -> stage them all

@@ -422,6 +422,202 @@ end, { desc = "LSP omni-completion" })
 -- Git
 vim.keymap.set("n", "<leader>gr", ":Gitsigns refresh<CR>", { desc = "Refresh git branch" })
 
+local function git_output(result)
+  return vim.trim(table.concat({ result.stdout or "", result.stderr or "" }, "\n"))
+end
+
+local function run_git(cwd, args, callback, opts)
+  local command = { "git" }
+  vim.list_extend(command, args)
+  opts = vim.tbl_extend("force", { cwd = cwd, text = true }, opts or {})
+
+  vim.system(command, opts, function(result)
+    vim.schedule(function()
+      callback(result)
+    end)
+  end)
+end
+
+local function notify_git(title, result, success_message)
+  local output = git_output(result)
+  vim.notify(
+    output ~= "" and output or success_message,
+    result.code == 0 and vim.log.levels.INFO or vim.log.levels.ERROR,
+    { title = title }
+  )
+end
+
+local function git_path_exists(cwd, name)
+  local result = vim.system(
+    { "git", "rev-parse", "--path-format=absolute", "--git-path", name },
+    { cwd = cwd, text = true }
+  ):wait()
+
+  if result.code ~= 0 then return false end
+  return vim.uv.fs_stat(vim.trim(result.stdout)) ~= nil
+end
+
+local function rebase_in_progress(cwd)
+  return git_path_exists(cwd, "rebase-merge") or git_path_exists(cwd, "rebase-apply")
+end
+
+local function git_push(cwd, force)
+  local args = { "push" }
+  if force then table.insert(args, "-f") end
+
+  run_git(cwd, args, function(result)
+    notify_git(force and "git push -f" or "git push", result, "Push complete")
+  end)
+end
+
+local function staged_files(cwd)
+  local result = vim.system(
+    { "git", "diff", "--cached", "--name-only" },
+    { cwd = cwd, text = true }
+  ):wait()
+
+  if result.code ~= 0 then return {} end
+  return vim.split(vim.trim(result.stdout or ""), "\n", { trimempty = true })
+end
+
+local function head_subject(cwd)
+  local result = vim.system(
+    { "git", "log", "-1", "--format=%h %s" },
+    { cwd = cwd, text = true }
+  ):wait()
+
+  return result.code == 0 and vim.trim(result.stdout) or "HEAD"
+end
+
+local function format_files(files)
+  local limit = 8
+  local lines = {}
+  for i = 1, math.min(#files, limit) do
+    lines[#lines + 1] = "  " .. files[i]
+  end
+  if #files > limit then
+    lines[#lines + 1] = ("  ...and %d more"):format(#files - limit)
+  end
+  return table.concat(lines, "\n")
+end
+
+local function upstream_behind_count(cwd)
+  local result = vim.system(
+    { "git", "rev-list", "--left-right", "--count", "@{upstream}...HEAD" },
+    { cwd = cwd, text = true }
+  ):wait()
+
+  if result.code ~= 0 then return nil end
+  return tonumber(result.stdout:match("(%d+)"))
+end
+
+local function git_push_smart()
+  local cwd = vim.uv.cwd()
+  local behind = upstream_behind_count(cwd)
+
+  if behind == nil or behind == 0 then
+    git_push(cwd, false)
+    return
+  end
+
+  local choice = vim.fn.confirm(
+    ("Upstream has %d commit(s) not in HEAD (history rewritten?). Force push?"):format(behind),
+    "&Force push\n&Cancel",
+    2
+  )
+  if choice == 1 then git_push(cwd, true) end
+end
+
+local function git_amend_or_continue()
+  local cwd = vim.uv.cwd()
+
+  if rebase_in_progress(cwd) then
+    local choice = vim.fn.confirm(
+      "Rebase in progress. Run `git rebase --continue`?",
+      "&Continue\n&Cancel",
+      1
+    )
+    if choice ~= 1 then return end
+
+    run_git(cwd, { "rebase", "--continue" }, function(result)
+      if result.code ~= 0 then
+        notify_git("git rebase --continue", result, "Unable to continue rebase")
+        return
+      end
+
+      if rebase_in_progress(cwd) then
+        notify_git(
+          "git rebase --continue",
+          result,
+          "Rebase advanced but is still in progress; resolve and stage the next stop"
+        )
+        return
+      end
+
+      notify_git("git rebase --continue", result, "Rebase complete")
+    end, {
+      -- Keep the commit's existing message instead of opening a nested editor.
+      env = { GIT_EDITOR = "true" },
+    })
+    return
+  end
+
+  local files = staged_files(cwd)
+  if #files == 0 then
+    vim.notify("Nothing staged to amend", vim.log.levels.WARN, { title = "git commit --amend" })
+    return
+  end
+
+  local choice = vim.fn.confirm(
+    ("Amend %s\nwith %d staged file(s):\n%s"):format(head_subject(cwd), #files, format_files(files)),
+    "&Amend\n&Cancel",
+    1
+  )
+  if choice ~= 1 then return end
+
+  run_git(cwd, { "commit", "--amend", "--no-edit" }, function(result)
+    notify_git("git commit --amend", result, "Amend complete")
+  end)
+end
+
+local function git_commit()
+  local cwd = vim.uv.cwd()
+
+  local files = staged_files(cwd)
+  if #files == 0 then
+    vim.notify("Nothing staged to commit", vim.log.levels.WARN, { title = "git commit" })
+    return
+  end
+
+  vim.ui.input({ prompt = "Commit message: " }, function(message)
+    message = message and vim.trim(message) or ""
+    if message == "" then return end
+
+    local choice = vim.fn.confirm(
+      ("Commit %d staged file(s):\n%s\n\nMessage: %s"):format(#files, format_files(files), message),
+      "&Commit\n&Cancel",
+      1
+    )
+    if choice ~= 1 then return end
+
+    run_git(cwd, { "commit", "-m", message }, function(result)
+      notify_git("git commit", result, "Commit complete")
+    end)
+  end)
+end
+
+vim.keymap.set("n", "<leader>gc", git_commit, {
+  desc = "Commit staged changes",
+})
+
+vim.keymap.set("n", "<leader>gC", git_amend_or_continue, {
+  desc = "Amend staged changes or continue rebase",
+})
+
+vim.keymap.set("n", "<leader>gw", git_push_smart, {
+  desc = "Push (confirms force push)",
+})
+
 -- Autocommands
 
 -- Auto save on focus lost or buffer switch
