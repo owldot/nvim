@@ -184,6 +184,8 @@ return {
         set_hl('GitConflictCurrentLabel', palette.none, palette.bg2)
         set_hl('GitConflictIncoming', palette.none, palette.bg_blue)
         set_hl('GitConflictIncomingLabel', palette.none, palette.bg2)
+        set_hl('GitConflictAncestor', palette.none, palette.bg_visual)
+        set_hl('GitConflictAncestorLabel', palette.none, palette.bg2)
       end
 
       apply_git_conflict_highlights()
@@ -264,44 +266,85 @@ return {
             gitsigns.blame_line({ full = true })
           end, { desc = 'Blame line' })
 
+          -- Layout: [ unified git diff | file (focused) ]; toggles.
+          -- Refreshes on save and on gitsigns index updates (staging).
           map('n', '<leader>gd', function()
+            local existing = vim.b[bufnr].unified_diff_win
+            if existing and vim.api.nvim_win_is_valid(existing) then
+              vim.api.nvim_win_close(existing, true)
+              vim.b[bufnr].unified_diff_win = nil
+              return
+            end
+
+            local file = vim.api.nvim_buf_get_name(bufnr)
             local orig_win = vim.api.nvim_get_current_win()
-            local before = vim.api.nvim_tabpage_list_wins(0)
-            gitsigns.diffthis()
-            vim.schedule(function()
-              -- the diff window is whichever one didn't exist before
-              local diff_win
-              for _, w in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
-                if not vim.tbl_contains(before, w) then
-                  diff_win = w
-                  break
-                end
+
+            local function diff_lines()
+              local result = vim.system(
+                { 'git', 'diff', '--', file },
+                { cwd = vim.fs.dirname(file), text = true }
+              ):wait()
+              if result.code ~= 0 or vim.trim(result.stdout or '') == '' then
+                return { '(no unstaged changes)' }
               end
-              if not diff_win then return end
+              return vim.split(result.stdout, '\n', { trimempty = true })
+            end
 
-              vim.api.nvim_set_current_win(diff_win)
+            vim.cmd('leftabove vnew')
+            local dwin = vim.api.nvim_get_current_win()
+            local dbuf = vim.api.nvim_get_current_buf()
+            vim.b[bufnr].unified_diff_win = dwin
+            vim.bo[dbuf].buftype = 'nofile'
+            vim.bo[dbuf].bufhidden = 'wipe'
+            vim.bo[dbuf].swapfile = false
+            vim.bo[dbuf].filetype = 'diff'
+            vim.wo[dwin].number = false
+            vim.wo[dwin].relativenumber = false
+            vim.wo[dwin].signcolumn = 'no'
+            pcall(vim.api.nvim_buf_set_name, dbuf, 'diff://' .. vim.fn.fnamemodify(file, ':t'))
 
-              -- q closes the diff scratch buffer
-              vim.keymap.set('n', 'q', '<cmd>close<cr>',
-                { buffer = vim.api.nvim_win_get_buf(diff_win), nowait = true })
+            local function render()
+              if not vim.api.nvim_buf_is_valid(dbuf) then return end
+              vim.bo[dbuf].modifiable = true
+              vim.api.nvim_buf_set_lines(dbuf, 0, -1, false, diff_lines())
+              vim.bo[dbuf].modifiable = false
+            end
+            render()
 
-              -- when the diff window closes, drop diff mode on the original
-              vim.api.nvim_create_autocmd('WinClosed', {
-                once = true,
-                pattern = tostring(diff_win),
-                callback = function()
-                  if vim.api.nvim_win_is_valid(orig_win) then
-                    vim.api.nvim_win_call(orig_win, function()
-                      vim.cmd('diffoff')
-                    end)
+            vim.keymap.set('n', 'q', '<cmd>close<cr>', { buffer = dbuf, nowait = true })
+
+            local group = vim.api.nvim_create_augroup('UnifiedDiff_' .. dwin, { clear = true })
+            vim.api.nvim_create_autocmd('BufWritePost', {
+              group = group, buffer = bufnr, callback = render,
+            })
+            vim.api.nvim_create_autocmd('User', {
+              group = group, pattern = 'GitSignsUpdate', callback = render,
+            })
+            vim.api.nvim_create_autocmd('WinClosed', {
+              group = group, pattern = tostring(dwin), once = true,
+              callback = function()
+                pcall(vim.api.nvim_del_augroup_by_id, group)
+                if vim.api.nvim_buf_is_valid(bufnr) then
+                  vim.b[bufnr].unified_diff_win = nil
+                end
+              end,
+            })
+            vim.api.nvim_create_autocmd('WinClosed', {
+              group = group, pattern = tostring(orig_win),
+              callback = function()
+                vim.schedule(function()
+                  if vim.api.nvim_win_is_valid(dwin) then
+                    pcall(vim.api.nvim_win_close, dwin, true)
                   end
-                end,
-              })
-            end)
-          end, { desc = 'Diff this' })
+                end)
+              end,
+            })
+
+            vim.api.nvim_set_current_win(orig_win)
+          end, { desc = 'Toggle unified diff (index vs file)' })
 
           map({ 'n', 'v' }, '<leader>ga', gitsigns.stage_hunk, { desc = 'Stage/unstage hunk' })
-          map('n', '<leader>gg', function()
+          map('n', '<leader>gA', function()
             local hunks = gitsigns.get_hunks(bufnr)
             if hunks and #hunks > 0 then
               gitsigns.stage_buffer()       -- unstaged hunks exist -> stage them all
