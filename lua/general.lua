@@ -618,12 +618,28 @@ vim.keymap.set("n", "<leader>gw", git_push_smart, {
   desc = "Push (confirms force push)",
 })
 
+vim.keymap.set("n", "<leader>gm", function()
+  vim.opt.hlsearch = true
+  vim.fn.setreg("/", [[\v^[<=>|]{7}([^|<=>].*)?$]])
+  vim.cmd("silent! normal! n")
+end, { desc = "Highlight conflict markers (n/N steps, V+n grabs sections)" })
+
 -- Autocommands
 
--- Auto save on focus lost or buffer switch
-vim.api.nvim_create_autocmd({"FocusLost", "BufLeave"}, {
-  pattern = "*",
-  command = "silent! update",
+-- Pick up files changed on disk (e.g. by agents) as soon as possible;
+-- 'autoread' then reloads unmodified buffers silently.
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "WinEnter", "CursorHold" }, {
+  callback = function()
+    if vim.fn.getcmdwintype() == "" and vim.bo.buftype == "" then
+      vim.cmd("checktime")
+    end
+  end,
+})
+
+vim.api.nvim_create_autocmd("FileChangedShellPost", {
+  callback = function(args)
+    vim.notify("Reloaded from disk: " .. vim.fn.fnamemodify(args.file, ":."), vim.log.levels.INFO)
+  end,
 })
 
 -- Autoformat and cleanup
