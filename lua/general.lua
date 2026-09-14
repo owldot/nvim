@@ -382,6 +382,17 @@ vim.keymap.set("n", "<leader>fg", function()
     additional_args = { "--fixed-strings" },
   })
 end, { desc = "Live grep (literal)" })
+vim.keymap.set("n", "<leader>fG", function()
+  vim.ui.input({ prompt = "File mask: " }, function(mask)
+    if not mask or mask == "" then return end
+    local globs = vim.split(mask, "%s+", { trimempty = true })
+    require("telescope.builtin").live_grep({
+      additional_args = { "--fixed-strings" },
+      glob_pattern = globs,
+      prompt_title = "Live grep (" .. mask .. ")",
+    })
+  end)
+end, { desc = "Live grep in file mask (literal)" })
 vim.keymap.set('n', '<leader>gs', function()
   local cwd = vim.uv.cwd()
   local prefix_result = vim.system(
